@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Premium Edition (Final)
+# QuoteGuard – Premium + Pricing
 # ==============================
 # Run: streamlit run app.py
 
@@ -53,7 +53,7 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TRANSLATIONS (PREMIUM PROFESSIONAL) ----------
+# ---------- TRANSLATIONS (PREMIUM + PRICING) ----------
 TRANSLATIONS = {
     "English": {
         "role": "Verification Engine",
@@ -84,7 +84,18 @@ TRANSLATIONS = {
         "active": "✅ LEGALLY ACTIVE",
         "closed": "❌ COMPANY CLOSED",
         "projects": {"Plumbing 🚿": "Plumbing 🚿", "Electricity ⚡": "Electricity ⚡", "Painting 🎨": "Painting 🎨", "General 🔨": "General 🔨"},
-        "disclaimer": "Independent • No affiliation with contractors • Estimations based on market averages."
+        "disclaimer": "Independent • No affiliation with contractors • Estimations based on market averages.",
+        "upgrade_title": "Upgrade to Expert Review",
+        "price_free": "Standard",
+        "price_paid": "Expert Audit",
+        "feat_1": "Instant Verdict",
+        "feat_2": "Market Price Check",
+        "feat_3": "SIRET Verification",
+        "feat_4": "Human Expert Review",
+        "feat_5": "Negotiation Support",
+        "cta_free": "Your Current Plan",
+        "cta_paid": "Get Expert Help",
+        "rec": "RECOMMENDED"
     },
     "Français": {
         "role": "Expertise & Audit",
@@ -115,7 +126,18 @@ TRANSLATIONS = {
         "active": "✅ SOCIÉTÉ ACTIVE (INSEE)",
         "closed": "❌ SOCIÉTÉ RADIÉE / FERMÉE",
         "projects": {"Plumbing 🚿": "Plomberie / Sanitaire 🚿", "Electricity ⚡": "Électricité / Mise aux normes ⚡", "Painting 🎨": "Peinture & Finitions 🎨", "General 🔨": "Rénovation Globale 🔨"},
-        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes de marché."
+        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes de marché.",
+        "upgrade_title": "Passer à l'Audit Expert",
+        "price_free": "Standard",
+        "price_paid": "Audit Expert",
+        "feat_1": "Verdict Instantané",
+        "feat_2": "Vérification Prix Marché",
+        "feat_3": "Vérification SIRET",
+        "feat_4": "Revue par un Expert Humain",
+        "feat_5": "Assistance Négociation",
+        "cta_free": "Votre Plan Actuel",
+        "cta_paid": "Réserver mon Expert",
+        "rec": "RECOMMANDÉ"
     }
 }
 
@@ -253,7 +275,6 @@ if file:
 
     # ---------- REPORT GENERATION ----------
     st.markdown("---")
-    
     report_text = f"""
     {t['title']} - {t['subtitle']}
     --------------------------------------------------
@@ -277,13 +298,54 @@ if file:
     --------------------------------------------------
     {t['disclaimer']}
     """
-
     st.download_button(
         label="📄 " + ("Download Audit Report" if lang == "English" else "Télécharger le Rapport"),
         data=report_text,
         file_name=f"QuoteGuard_Audit_{int(time.time())}.txt",
         mime="text/plain"
     )
+
+    # ---------- PRICING SECTION (NEW) ----------
+    st.markdown("---")
+    st.markdown(f"### 💎 {t['upgrade_title']}")
+
+    c1, c2 = st.columns(2)
+    
+    # Free Tier
+    with c1:
+        st.markdown(f"""
+        <div style="border:1px solid #E2E8F0; border-radius:10px; padding:20px; height:100%;">
+            <h4 style="margin:0;">{t['price_free']}</h4>
+            <h2 style="font-size:32px; color:#64748B;">€0</h2>
+            <p style="font-size:12px; opacity:0.7;">Automated Check</p>
+            <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+            <ul style="list-style:none; padding:0; font-size:13px; line-height:2;">
+                <li>✅ {t['feat_1']}</li>
+                <li>✅ {t['feat_2']}</li>
+                <li>✅ {t['feat_3']}</li>
+                <li style="opacity:0.5;">❌ {t['feat_4']}</li>
+                <li style="opacity:0.5;">❌ {t['feat_5']}</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Paid Tier
+    with c2:
+        st.markdown(f"""
+        <div style="border:2px solid #22C55E; background:#F0FDF4; border-radius:10px; padding:20px; height:100%; position:relative;">
+            <div style="position:absolute; top:-12px; right:20px; background:#22C55E; color:white; padding:2px 10px; border-radius:12px; font-size:10px; font-weight:bold;">{t['rec']}</div>
+            <h4 style="margin:0; color:#166534;">{t['price_paid']}</h4>
+            <h2 style="font-size:32px; color:#15803D;">€29</h2>
+            <p style="font-size:12px; color:#166534;">Manual Review</p>
+            <hr style="margin:10px 0; border:0; border-top:1px solid #bbf7d0;">
+            <ul style="list-style:none; padding:0; font-size:13px; line-height:2; color:#14532d;">
+                <li>✅ <b>{t['feat_1']}</b></li>
+                <li>✅ {t['feat_4']}</li>
+                <li>✅ {t['feat_5']}</li>
+            </ul>
+            <a href="https://wa.me/33759823532?text=I%20am%20interested%20in%20the%20Expert%20Audit%20for%2029EUR" target="_blank" style="display:block; background:#166534; color:white; text-align:center; padding:10px; border-radius:6px; text-decoration:none; font-weight:600; margin-top:15px;">{t['cta_paid']}</a>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ---------- FOOTER ----------
 st.caption(t["disclaimer"])
