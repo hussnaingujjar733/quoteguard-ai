@@ -6,3 +6,5 @@ pdfplumber
 requests
 plotly
 fpdf
+Pillow
+pytesseract
