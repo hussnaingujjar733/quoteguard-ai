@@ -15,10 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. THE V16 "MESH" CSS ---
+# --- 2. THE CLEAN CSS ---
 st.markdown("""
     <style>
-    /* IMPORT GOOGLE FONT (The "Startup" Look) */
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
     html, body, [class*="css"] {
@@ -28,7 +27,7 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
-    /* DYNAMIC MESH BACKGROUND */
+    /* MESH BACKGROUND */
     .stApp {
         background-color: #F8FAFC;
         background-image: 
@@ -39,20 +38,9 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* GLASS CARD WITH GLOW BORDER */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        border-radius: 20px;
-        padding: 30px;
-        margin-top: 15px;
-        animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
+    /* REMOVED THE BIG WHITE GLASS CARD - INPUTS NOW FLOAT CLEANLY */
 
-    /* NEGOTIATION CARD (Money Maker) */
+    /* NEGOTIATION CARD */
     .negotiation-card {
         background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
         border: 1px solid #86EFAC;
@@ -60,30 +48,6 @@ st.markdown("""
         border-radius: 12px;
         margin-top: 20px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s;
-    }
-    .negotiation-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    /* HERO IMAGE */
-    .hero-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-        animation: fadeIn 1.2s ease-out;
-    }
-    .hero-img {
-        width: 100%;
-        max-width: 280px;
-        border-radius: 16px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-        transform: rotate(-1deg); /* Slight tilt for style */
-        transition: transform 0.3s ease;
-    }
-    .hero-img:hover {
-        transform: rotate(0deg) scale(1.02);
     }
 
     /* SIDEBAR STYLE */
@@ -98,29 +62,25 @@ st.markdown("""
 
     /* TYPOGRAPHY */
     .title-text { 
-        font-size: 40px; 
+        font-size: 42px; 
         font-weight: 800; 
-        color: #FFFFFF; /* White title on dark background */
+        color: #FFFFFF; 
         text-align: center; 
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         margin-bottom: 5px;
     }
     .subtitle-text { 
         font-size: 16px; 
         color: #CBD5E1; 
         text-align: center; 
-        margin-bottom: 25px;
+        margin-bottom: 40px; /* Added space since image is gone */
         font-weight: 400;
     }
 
     /* ANIMATIONS */
     @keyframes slideUp {
-        from { opacity: 0; transform: translateY(40px); }
+        from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
     }
     .animate-enter { animation: slideUp 0.6s ease-out both; }
 
@@ -250,18 +210,12 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     st.link_button(t['wa_button'], "https://wa.me/33759823532", type="primary")
 
-# HERO SECTION
-st.markdown("""
-    <div class="hero-container">
-        <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=600&auto=format&fit=crop" class="hero-img">
-    </div>
-""", unsafe_allow_html=True)
-
+# TITLE SECTION (No Image)
+st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
 
-# MAIN CARD
-st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+# MAIN INPUTS (Floating directly on background, no box)
 c1, c2 = st.columns([1, 1])
 proj_display = list(t["projects"].values())
 sel_disp = c1.selectbox(t["proj_label"], proj_display)
@@ -288,8 +242,8 @@ if file:
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
-    # RESULTS DISPLAY
-    st.markdown(f'<div style="background: rgba(255,255,255,0.7); padding: 20px; border-radius: 12px; border-left: 6px solid {color}; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">', unsafe_allow_html=True)
+    # RESULTS CARD (Kept this for contrast)
+    st.markdown(f'<div style="background: rgba(255,255,255,0.9); padding: 25px; border-radius: 12px; border-left: 6px solid {color}; margin-top: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">', unsafe_allow_html=True)
     st.markdown(f"### {t['verdict']}: <span style='color:{color}'>{risk}</span>", unsafe_allow_html=True)
     m1, m2 = st.columns(2)
     m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}", delta_color="inverse")
@@ -304,7 +258,7 @@ if file:
     with c2: st.markdown(f"**{c_status}**")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # MONEY MAKER SECTION
+    # NEGOTIATION SECTION
     st.markdown("<br>", unsafe_allow_html=True)
     if markup > 40:
         st.error(f"{t['alert_title']} €{difference:,.0f}!")
@@ -325,10 +279,8 @@ if file:
         st.success(f"{t['safe_title']} €{abs(difference):,.0f}!")
         st.link_button(t["safe_btn"], f"https://wa.me/33759823532?text=Quote%20Check%20Passed", type="secondary")
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # FOOTER BADGES
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
 b1, b2, b3 = st.columns(3)
 with b1: st.markdown('<div style="text-align:center; opacity:0.7; font-size:12px;">⚡ Fast</div>', unsafe_allow_html=True)
 with b2: st.markdown('<div style="text-align:center; opacity:0.7; font-size:12px;">🏛️ Official</div>', unsafe_allow_html=True)
