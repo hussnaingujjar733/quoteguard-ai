@@ -15,46 +15,51 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. THE COMPACT CSS ---
+# --- 2. THE PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* 1. RESTORE SIDEBAR ARROW (Do not hide header) */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    /* header {visibility: hidden;} <--- DELETED THIS SO ARROW SHOWS */
-
-    /* 2. APP BACKGROUND */
+    
     .stApp {
         background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
     }
 
-    /* 3. HERO IMAGE (Compact) */
+    /* HERO & IMAGES */
     .hero-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 10px; /* Reduced space */
+        margin-bottom: 15px;
         animation: fadeInUp 1s ease-out both;
     }
     .hero-img {
         width: 100%;
-        max-width: 250px; /* <--- MUCH SMALLER (Fits screen) */
-        height: auto;
+        max-width: 250px;
         border-radius: 12px;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    /* 4. GLASS CARD (Compact) */
+    /* GLASS CARD */
     .glass-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
         border: 1px solid white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         border-radius: 15px;
-        padding: 20px; /* Reduced padding */
+        padding: 25px;
         margin-top: 10px;
     }
 
-    /* 5. SIDEBAR (Dark Navy) */
+    /* NEGOTIATION CARD (New) */
+    .negotiation-card {
+        background: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 15px;
+        animation: fadeInUp 1.5s ease-out both;
+    }
+
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
     }
@@ -62,13 +67,12 @@ st.markdown("""
         color: #E2E8F0 !important;
     }
 
-    /* 6. TYPOGRAPHY (Compact) */
+    /* TYPOGRAPHY */
     .title-text { 
-        font-size: 32px; /* Smaller Title */
+        font-size: 36px; 
         font-weight: 800; 
         color: #0F172A; 
         text-align: center; 
-        margin-bottom: 0px;
     }
     .subtitle-text { 
         font-size: 16px; 
@@ -77,14 +81,12 @@ st.markdown("""
         margin-bottom: 15px;
     }
     
-    /* ANIMATIONS */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translate3d(0, 20px, 0); }
         to { opacity: 1; transform: none; }
     }
     .animate-enter { animation: fadeInUp 0.8s ease-out both; }
 
-    /* PROFILE PICTURE */
     .profile-img {
         border-radius: 50%;
         border: 2px solid #3B82F6;
@@ -93,7 +95,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- TRANSLATIONS (Same as before) ---
+# --- TRANSLATIONS ---
 TRANSLATIONS = {
     "English": {
         "role": "Lead Data Scientist",
@@ -105,24 +107,20 @@ TRANSLATIONS = {
         "upload_label": "Upload Devis (PDF)",
         "prog_init": "Initializing AI...",
         "prog_check": "🔎 Checking Gov Database...",
-        "prog_done": "✅ Done",
+        "prog_done": "✅ Analysis Complete",
         "verdict": "Verdict",
         "metric_quote": "Quoted Price",
         "metric_fair": "Fair Market Est.",
         "metric_markup": "vs Market",
-        "chart_fair": "Market Price",
-        "chart_user": "Your Quote",
         "chart_title": "Price Comparison",
         "risk_high": "HIGH RISK",
         "risk_safe": "SAFE",
-        "alert_title": "⚠️ Overpriced. Do not sign.",
-        "alert_btn": "🚨 Report to Hussnain",
-        "safe_title": "✅ Price looks fair.",
-        "safe_btn": "💬 Ask Second Opinion",
-        "trust_title": "Why Expats Trust QuoteGuard",
-        "badge_fast": "Instant",
-        "badge_gov": "Gov Data",
-        "badge_priv": "Private",
+        "alert_title": "⚠️ You are overpaying by",
+        "alert_btn": "🚨 Get Help from Hussnain",
+        "safe_title": "✅ Great Deal! You are saving",
+        "safe_btn": "💬 Confirm with Expert",
+        "nego_title": "💡 AI Negotiation Script",
+        "nego_desc": "Copy this text and send it to your artisan to lower the price:",
         "unknown": "❓ CHECK MANUALLY",
         "addr_missing": "Address not detected",
         "active": "✅ ACTIVE",
@@ -139,24 +137,20 @@ TRANSLATIONS = {
         "upload_label": "Télécharger Devis (PDF)",
         "prog_init": "Démarrage de l'IA...",
         "prog_check": "🔎 Vérification SIRET...",
-        "prog_done": "✅ Terminé",
+        "prog_done": "✅ Analyse Terminée",
         "verdict": "Verdict",
         "metric_quote": "Prix du Devis",
-        "metric_fair": "Prix Moyen Marché",
+        "metric_fair": "Prix Juste",
         "metric_markup": "vs Marché",
-        "chart_fair": "Prix du Marché",
-        "chart_user": "Votre Devis",
         "chart_title": "Comparaison des Prix",
         "risk_high": "RISQUE ÉLEVÉ",
         "risk_safe": "SÛR",
-        "alert_title": "⚠️ Trop cher. Ne signez pas.",
-        "alert_btn": "🚨 Signaler à l'Expert",
-        "safe_title": "✅ Le prix semble correct.",
-        "safe_btn": "💬 Demander un 2ème avis",
-        "trust_title": "Pourquoi nous faire confiance ?",
-        "badge_fast": "Rapide",
-        "badge_gov": "Données Gouv",
-        "badge_priv": "Privé",
+        "alert_title": "⚠️ Vous payez trop cher de",
+        "alert_btn": "🚨 Contacter l'Expert",
+        "safe_title": "✅ Bonne affaire ! Économie :",
+        "safe_btn": "💬 Confirmer ce devis",
+        "nego_title": "💡 Script de Négociation IA",
+        "nego_desc": "Copiez ce texte et envoyez-le à votre artisan pour baisser le prix :",
         "unknown": "❓ VÉRIFIER MANUELLEMENT",
         "addr_missing": "Adresse non détectée",
         "active": "✅ ACTIF",
@@ -194,23 +188,17 @@ def extract_data_from_pdf(file):
 
 def create_chart(user, fair, t):
     fig = go.Figure(data=[
-        go.Bar(name=t["chart_fair"], x=['Cost'], y=[fair], marker_color='#22C55E'),
-        go.Bar(name=t["chart_user"], x=['Cost'], y=[user], marker_color='#EF4444')
+        go.Bar(name="Market Price", x=['Cost'], y=[fair], marker_color='#22C55E'),
+        go.Bar(name="Your Quote", x=['Cost'], y=[user], marker_color='#EF4444')
     ])
     fig.update_layout(
-        barmode='group', 
-        height=220,  # Compact Chart
-        margin=dict(l=10, r=10, t=30, b=10),
-        title_text=t["chart_title"],
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="sans-serif", size=10)
+        barmode='group', height=200, margin=dict(l=10, r=10, t=30, b=10),
+        title_text=t["chart_title"], plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="sans-serif", size=12)
     )
     return fig
 
 # --- APP LAYOUT ---
-
-# SIDEBAR
 with st.sidebar:
     lang = st.radio("🌐 Language", ["English", "Français"], horizontal=True)
     t = TRANSLATIONS[lang]
@@ -223,7 +211,6 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     st.link_button(t['wa_button'], "https://wa.me/33759823532", type="primary")
 
-# MAIN CONTENT
 st.markdown("""
     <div class="hero-container">
         <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=600&auto=format&fit=crop" class="hero-img">
@@ -233,7 +220,6 @@ st.markdown("""
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
 
-# COMPACT GLASS CARD
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 c1, c2 = st.columns([1, 1])
 proj_display = list(t["projects"].values())
@@ -256,17 +242,20 @@ if file:
     if price == 0: price = 1250.0
     fair = {"Plumbing 🚿": 600, "Electricity ⚡": 900, "Painting 🎨": 1200, "General 🔨": 2000}.get(sel_key, 1000)
     markup = int(((price - fair) / fair) * 100)
+    difference = price - fair
     
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
-    # RESULTS
+    # 1. MAIN RESULTS
     st.markdown(f'<div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 10px; border-left: 5px solid {color}; margin-top: 15px;">', unsafe_allow_html=True)
     st.markdown(f"### {t['verdict']}: <span style='color:{color}'>{risk}</span>", unsafe_allow_html=True)
     m1, m2 = st.columns(2)
     m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}", delta_color="inverse")
     m2.metric(t["metric_fair"], f"€{fair:,.0f}")
     st.plotly_chart(create_chart(price, fair, t), use_container_width=True)
+    
+    # 2. COMPANY INFO
     st.markdown("---")
     st.markdown(f"**🏢 {c_name}**")
     c1, c2 = st.columns([3, 1])
@@ -274,19 +263,30 @@ if file:
     with c2: st.markdown(f"**{c_status}**")
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # 3. THE MONEY MAKER SECTION
+    st.markdown("<br>", unsafe_allow_html=True)
     if markup > 40:
-        st.error(t["alert_title"])
-        st.link_button(t["alert_btn"], f"https://wa.me/33759823532?text=HIGH%20RISK%20quote%20detected%20({price}EUR)")
+        # LOSS AVERSION ALERT
+        st.error(f"{t['alert_title']} €{difference:,.0f}!")
+        
+        # AI NEGOTIATOR (NEW FEATURE)
+        st.markdown(f"""
+        <div class="negotiation-card">
+            <h4>{t['nego_title']} 🤖</h4>
+            <p>{t['nego_desc']}</p>
+            <code style="background: white; padding: 10px; display: block; border-radius: 5px; color: #333;">
+                "Bonjour, j'ai bien reçu votre devis de {price}€. Cependant, après vérification des prix du marché parisien pour ce type de travaux, la moyenne se situe autour de {fair}€. Pouvez-vous revoir votre offre pour vous rapprocher de ce montant ? Merci."
+            </code>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.link_button(t["alert_btn"], f"https://wa.me/33759823532?text=I%20need%20help%20negotiating%20a%20quote%20of%20{price}EUR")
     else:
-        st.success(t["safe_title"])
+        st.success(f"{t['safe_title']} €{abs(difference):,.0f}!")
         st.link_button(t["safe_btn"], f"https://wa.me/33759823532?text=Checking%20quote%20({price}EUR)")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
 # FOOTER
 st.markdown("<br>", unsafe_allow_html=True)
-b1, b2, b3 = st.columns(3)
-with b1: st.markdown(f'<div style="text-align:center; font-size:12px; color:#64748B;">⚡ <b>{t["badge_fast"]}</b></div>', unsafe_allow_html=True)
-with b2: st.markdown(f'<div style="text-align:center; font-size:12px; color:#64748B;">🏛️ <b>{t["badge_gov"]}</b></div>', unsafe_allow_html=True)
-with b3: st.markdown(f'<div style="text-align:center; font-size:12px; color:#64748B;">🔒 <b>{t["badge_priv"]}</b></div>', unsafe_allow_html=True)
-st.markdown('<div style="text-align: center; color: #ccc; font-size: 10px; margin-top: 20px;">© 2025 QuoteGuard AI</div>', unsafe_allow_html=True)
+st.caption("© 2025 QuoteGuard AI - Paris")
