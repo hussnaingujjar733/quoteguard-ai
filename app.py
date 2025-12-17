@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Premium + Pricing
+# QuoteGuard – Premium + PDF Report
 # ==============================
 # Run: streamlit run app.py
 
@@ -12,6 +12,7 @@ import requests
 import plotly.graph_objects as go
 import base64
 from datetime import datetime
+from fpdf import FPDF
 
 # ---------- CONFIG ----------
 st.set_page_config(
@@ -53,7 +54,7 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TRANSLATIONS (PREMIUM + PRICING) ----------
+# ---------- TRANSLATIONS ----------
 TRANSLATIONS = {
     "English": {
         "role": "Verification Engine",
@@ -180,6 +181,52 @@ def chart(user_price, fair_price, title):
                       plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
     return fig
 
+def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", "B", 20)
+    pdf.cell(0, 10, t["title"], ln=True, align="C")
+    pdf.set_font("Arial", "I", 12)
+    pdf.cell(0, 10, t["subtitle"], ln=True, align="C")
+    pdf.line(10, 30, 200, 30)
+    pdf.ln(10)
+    
+    # Details
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, f"DATE: {datetime.now().strftime('%Y-%m-%d')}", ln=True)
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 10, f"Category: {project}", ln=True)
+    pdf.cell(0, 10, f"Company: {name} ({status})", ln=True)
+    pdf.cell(0, 10, f"Address: {addr}", ln=True)
+    pdf.ln(5)
+    
+    # Financials
+    pdf.set_fill_color(240, 240, 240)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, "FINANCIAL ANALYSIS", ln=True, fill=True)
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(100, 10, t["metric_quote"], border=1)
+    pdf.cell(0, 10, f"{price:,.2f} EUR", border=1, ln=True)
+    pdf.cell(100, 10, t["metric_fair"], border=1)
+    pdf.cell(0, 10, f"{fair:,.2f} EUR", border=1, ln=True)
+    pdf.cell(100, 10, "Difference", border=1)
+    pdf.cell(0, 10, f"{diff:,.2f} EUR", border=1, ln=True)
+    pdf.ln(5)
+    
+    # Verdict
+    color = (200, 50, 50) if "HIGH" in risk or "RISQUE" in risk else (50, 150, 50)
+    pdf.set_text_color(*color)
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, f"VERDICT: {risk}", ln=True, align="C")
+    pdf.set_text_color(0, 0, 0)
+    
+    # Footer
+    pdf.set_y(-30)
+    pdf.set_font("Arial", "I", 8)
+    pdf.multi_cell(0, 5, t["disclaimer"])
+    
+    return pdf.output(dest="S").encode("latin-1")
+
 # ---------- SIDEBAR ----------
 lang = st.sidebar.radio("🌐 Language", ["English", "Français"], horizontal=True)
 t = TRANSLATIONS[lang]
@@ -273,45 +320,23 @@ if file:
         st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
         st.link_button(t["safe_btn"], "https://wa.me/33759823532")
 
-    # ---------- REPORT GENERATION ----------
+    # ---------- PDF REPORT (NEW) ----------
     st.markdown("---")
-    report_text = f"""
-    {t['title']} - {t['subtitle']}
-    --------------------------------------------------
-    DATE: {datetime.now().strftime("%Y-%m-%d %H:%M")}
-    ID: {str(int(time.time()))}
+    pdf_data = create_pdf(t, project, name, status, addr, price, fair, diff, risk)
     
-    1. PROJECT DETAILS
-    ------------------
-    Category: {project}
-    Company Detected: {name}
-    Status: {status}
-    Address: {addr}
-    
-    2. FINANCIAL AUDIT
-    ------------------
-    Quoted Price: €{price:,.2f}
-    Fair Market Estimate: €{fair:,.2f}
-    Difference: €{diff:,.2f}
-    
-    VERDICT: {risk}
-    --------------------------------------------------
-    {t['disclaimer']}
-    """
     st.download_button(
-        label="📄 " + ("Download Audit Report" if lang == "English" else "Télécharger le Rapport"),
-        data=report_text,
-        file_name=f"QuoteGuard_Audit_{int(time.time())}.txt",
-        mime="text/plain"
+        label="📄 " + ("Download Official PDF Audit" if lang == "English" else "Télécharger Audit PDF Officiel"),
+        data=pdf_data,
+        file_name=f"QuoteGuard_Audit_{int(time.time())}.pdf",
+        mime="application/pdf"
     )
 
-    # ---------- PRICING SECTION (NEW) ----------
+    # ---------- PRICING SECTION ----------
     st.markdown("---")
     st.markdown(f"### 💎 {t['upgrade_title']}")
 
     c1, c2 = st.columns(2)
     
-    # Free Tier
     with c1:
         st.markdown(f"""
         <div style="border:1px solid #E2E8F0; border-radius:10px; padding:20px; height:100%;">
@@ -329,7 +354,6 @@ if file:
         </div>
         """, unsafe_allow_html=True)
     
-    # Paid Tier
     with c2:
         st.markdown(f"""
         <div style="border:2px solid #22C55E; background:#F0FDF4; border-radius:10px; padding:20px; height:100%; position:relative;">
