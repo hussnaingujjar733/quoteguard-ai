@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Final SaaS Version
+# QuoteGuard – Final Investor Version (Demo Mode)
 # ==============================
 # Run: streamlit run app.py
 
@@ -21,6 +21,13 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="expanded"
 )
+
+# ---------- SESSION STATE (For Demo Mode) ----------
+if 'demo_mode' not in st.session_state:
+    st.session_state.demo_mode = False
+
+def activate_demo():
+    st.session_state.demo_mode = True
 
 # ---------- CSS ----------
 st.markdown("""
@@ -96,7 +103,8 @@ TRANSLATIONS = {
         "feat_5": "Negotiation Support",
         "cta_free": "Your Current Plan",
         "cta_paid": "Get Expert Help",
-        "rec": "RECOMMENDED"
+        "rec": "RECOMMENDED",
+        "demo_btn": "⚡ Try Demo Quote"
     },
     "Français": {
         "role": "Expertise & Audit",
@@ -138,7 +146,8 @@ TRANSLATIONS = {
         "feat_5": "Assistance Négociation",
         "cta_free": "Votre Plan Actuel",
         "cta_paid": "Réserver mon Expert",
-        "rec": "RECOMMANDÉ"
+        "rec": "RECOMMANDÉ",
+        "demo_btn": "⚡ Essayer la Démo"
     }
 }
 
@@ -277,42 +286,60 @@ c1, c2 = st.columns(2)
 project = c1.selectbox(t["proj_label"], list(t["projects"].values()))
 file = c2.file_uploader(t["upload_label"], type=["pdf"])
 
-# ---------- PROCESS OR LANDING PAGE ----------
-if file:
-    bar = st.progress(0, t["prog_init"])
-    time.sleep(0.4)
+# ---------- LOGIC: FILE or DEMO ----------
+if file or st.session_state.demo_mode:
+    
+    # 1. SETUP DATA
+    if file:
+        # REAL MODE
+        bar = st.progress(0, t["prog_init"])
+        time.sleep(0.4)
+        price, siret = extract_from_pdf(file)
+        bar.progress(50, t["prog_check"])
+        
+        name, status, addr = ("Unknown", t["unknown"], "")
+        if siret:
+            name, status, addr = check_siret(siret)
+            
+        bar.progress(100, t["prog_done"])
+        time.sleep(0.2)
+        bar.empty()
+    else:
+        # DEMO MODE (Fake Data for Investor)
+        st.info("⚡ DEMO MODE: Simulating analysis of a high-risk quote...")
+        time.sleep(1.5)
+        price = 25000.0
+        name = "Renov' Paris Expert SARL"
+        status = t["active"]
+        addr = "12 Avenue des Champs-Élysées, 75008 Paris"
+        project = "General 🔨" if lang == "English" else "Rénovation Globale 🔨"
 
-    price, siret = extract_from_pdf(file)
-    bar.progress(50, t["prog_check"])
-
-    name, status, addr = ("Unknown", t["unknown"], "")
-    if siret:
-        name, status, addr = check_siret(siret)
-
-    bar.progress(100, t["prog_done"])
-    time.sleep(0.2)
-    bar.empty()
-
-    if price == 0:
-        price = 1200.0
+    if price == 0: price = 1200.0
 
     fair_map = {
         "Plumbing 🚿": 600,
         "Electricity ⚡": 900,
         "Painting 🎨": 1200,
-        "General Renovation 🔨": 2000,
+        "General 🔨": 2000,
         "Plomberie / Sanitaire 🚿": 600,
         "Électricité / Mise aux normes ⚡": 900,
         "Peinture & Finitions 🎨": 1200,
-        "Rénovation Globale 🔨": 2000
+        "Rénovation Globale 🔨": 18000 # Higher benchmark for demo
     }
-    fair = fair_map.get(project, 1000)
+    
+    # Demo logic adjustment
+    if st.session_state.demo_mode:
+        fair = 18000
+    else:
+        fair = fair_map.get(project, 1000)
+
     markup = int(((price - fair) / fair) * 100)
     diff = price - fair
 
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
+    # 2. DISPLAY RESULTS
     st.markdown(f"### {t['verdict']}: **:{color}[{risk}]**")
     m1, m2 = st.columns(2)
     m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}")
@@ -337,7 +364,7 @@ if file:
         st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
         st.link_button(t["safe_btn"], "https://wa.me/33759823532")
 
-    # ---------- PDF REPORT ----------
+    # 3. PDF REPORT
     st.markdown("---")
     pdf_data = create_pdf(t, project, name, status, addr, price, fair, diff, risk)
     
@@ -348,12 +375,11 @@ if file:
         mime="application/pdf"
     )
 
-    # ---------- PRICING SECTION ----------
+    # 4. PRICING SECTION
     st.markdown("---")
     st.markdown(f"### 💎 {t['upgrade_title']}")
 
     c1, c2 = st.columns(2)
-    
     with c1:
         st.markdown(f"""
         <div style="border:1px solid #E2E8F0; border-radius:10px; padding:20px; height:100%;">
@@ -387,10 +413,23 @@ if file:
             <a href="https://wa.me/33759823532?text=I%20am%20interested%20in%20the%20Expert%20Audit%20for%2029EUR" target="_blank" style="display:block; background:#166534; color:white; text-align:center; padding:10px; border-radius:6px; text-decoration:none; font-weight:600; margin-top:15px;">{t['cta_paid']}</a>
         </div>
         """, unsafe_allow_html=True)
+        
+    if st.session_state.demo_mode:
+        if st.button("🔄 Reset"):
+            st.session_state.demo_mode = False
+            st.rerun()
 
 else:
-    # ---------- LANDING PAGE CONTENT (When no file uploaded) ----------
+    # ---------- LANDING PAGE CONTENT ----------
     st.markdown("<br>", unsafe_allow_html=True)
+    
+    # DEMO BUTTON
+    c_demo = st.container()
+    col_d1, col_d2, col_d3 = c_demo.columns([1, 2, 1])
+    with col_d2:
+        if st.button(t["demo_btn"], type="primary", use_container_width=True):
+            activate_demo()
+            st.rerun()
     
     # 1. HOW IT WORKS
     st.markdown(f"### ⚡ {('How it works' if lang == 'English' else 'Comment ça marche')}")
