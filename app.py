@@ -15,116 +15,89 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. THE "SILICON VALLEY" CSS ---
+# --- 2. THE COMPACT CSS ---
 st.markdown("""
     <style>
-    /* HIDE STREAMLIT UI */
+    /* 1. RESTORE SIDEBAR ARROW (Do not hide header) */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* header {visibility: hidden;} <--- DELETED THIS SO ARROW SHOWS */
 
-    /* APP BACKGROUND (Subtle Gradient) */
+    /* 2. APP BACKGROUND */
     .stApp {
         background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
     }
 
-    /* SIDEBAR (Dark Premium Navy) */
+    /* 3. HERO IMAGE (Compact) */
+    .hero-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px; /* Reduced space */
+        animation: fadeInUp 1s ease-out both;
+    }
+    .hero-img {
+        width: 100%;
+        max-width: 250px; /* <--- MUCH SMALLER (Fits screen) */
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 4. GLASS CARD (Compact) */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-radius: 15px;
+        padding: 20px; /* Reduced padding */
+        margin-top: 10px;
+    }
+
+    /* 5. SIDEBAR (Dark Navy) */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
-        border-right: 1px solid #334155;
     }
     [data-testid="stSidebar"] * {
         color: #E2E8F0 !important;
     }
 
-    /* ANIMATIONS */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translate3d(0, 30px, 0); }
-        to { opacity: 1; transform: none; }
-    }
-    @keyframes pulse-blue {
-        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-        70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-    }
-    .animate-enter {
-        animation: fadeInUp 0.8s ease-out both;
-    }
-
-    /* PROFILE PICTURE (Breathing) */
-    .profile-img {
-        border-radius: 50%;
-        border: 3px solid #3B82F6;
-        padding: 3px;
-        animation: pulse-blue 3s infinite;
-    }
-
-    /* HERO IMAGE STYLE (FIXED) */
-    .hero-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-        animation: fadeInUp 1s ease-out both;
-        overflow: hidden;
-        border-radius: 20px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-    .hero-img {
-        width: 100%;
-        max-width: 600px; /* Made it slightly wider for cinematic look */
-        height: auto;
-        object-fit: cover;
-    }
-
-    /* GLASSMORPHISM CARD */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        border-radius: 24px;
-        padding: 35px;
-        margin-top: 20px;
-        animation: fadeInUp 1.2s ease-out both;
-    }
-
-    /* TYPOGRAPHY */
+    /* 6. TYPOGRAPHY (Compact) */
     .title-text { 
-        font-size: 46px; 
-        font-weight: 900; 
+        font-size: 32px; /* Smaller Title */
+        font-weight: 800; 
         color: #0F172A; 
         text-align: center; 
-        letter-spacing: -1px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 0px;
     }
     .subtitle-text { 
-        font-size: 18px; 
+        font-size: 16px; 
         color: #64748B; 
         text-align: center; 
-        margin-bottom: 10px; 
-        font-weight: 500;
+        margin-bottom: 15px;
     }
     
-    /* BADGES */
-    .trust-badge {
-        text-align: center;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #475569;
-        transition: transform 0.3s;
+    /* ANIMATIONS */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translate3d(0, 20px, 0); }
+        to { opacity: 1; transform: none; }
     }
-    .trust-badge:hover { transform: translateY(-5px); }
+    .animate-enter { animation: fadeInUp 0.8s ease-out both; }
+
+    /* PROFILE PICTURE */
+    .profile-img {
+        border-radius: 50%;
+        border: 2px solid #3B82F6;
+        padding: 2px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# --- TRANSLATIONS ---
+# --- TRANSLATIONS (Same as before) ---
 TRANSLATIONS = {
     "English": {
         "role": "Lead Data Scientist",
-        "bio": "I built this AI to stop renovation scams in Paris. Message me directly for help.",
+        "bio": "I built this AI to stop renovation scams in Paris.",
         "wa_button": "👉 WhatsApp Me",
         "title": "QuoteGuard AI",
         "subtitle": "Paris Renovation Verification Engine",
@@ -158,7 +131,7 @@ TRANSLATIONS = {
     },
     "Français": {
         "role": "Data Scientist Principal",
-        "bio": "J'ai créé cette IA pour stopper les arnaques aux travaux à Paris. Écrivez-moi pour de l'aide.",
+        "bio": "J'ai créé cette IA pour stopper les arnaques aux travaux à Paris.",
         "wa_button": "👉 Me contacter (WhatsApp)",
         "title": "QuoteGuard AI",
         "subtitle": "Vérificateur de Devis Travaux",
@@ -226,12 +199,12 @@ def create_chart(user, fair, t):
     ])
     fig.update_layout(
         barmode='group', 
-        height=250, 
-        margin=dict(l=20, r=20, t=30, b=20),
+        height=220,  # Compact Chart
+        margin=dict(l=10, r=10, t=30, b=10),
         title_text=t["chart_title"],
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="sans-serif")
+        font=dict(family="sans-serif", size=10)
     )
     return fig
 
@@ -239,31 +212,28 @@ def create_chart(user, fair, t):
 
 # SIDEBAR
 with st.sidebar:
-    lang = st.radio("🌐 Language / Langue", ["English", "Français"], horizontal=True)
+    lang = st.radio("🌐 Language", ["English", "Français"], horizontal=True)
     t = TRANSLATIONS[lang]
     st.markdown("<br>", unsafe_allow_html=True)
     img = get_img_as_base64("profile.jpeg")
     if img:
-        st.markdown(f'<div style="display: flex; justify-content: center;"><img src="data:image/jpeg;base64,{img}" class="profile-img" style="width: 140px; height: 140px; object-fit: cover;"></div>', unsafe_allow_html=True)
-    st.markdown(f'<div style="text-align: center; margin-top: 20px;"><h2 style="margin:0; font-weight: 800;">Hussnain</h2><p style="opacity: 0.8; font-size: 14px;">{t["role"]}</p></div>', unsafe_allow_html=True)
-    st.markdown(f'<div style="background-color: rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; font-size: 13px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.2);">{t["bio"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="display: flex; justify-content: center;"><img src="data:image/jpeg;base64,{img}" class="profile-img" style="width: 120px; height: 120px; object-fit: cover;"></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align: center; margin-top: 15px;"><h3 style="margin:0; color:white;">Hussnain</h3><p style="opacity: 0.8; font-size: 12px; color:#cbd5e1;">{t["role"]}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.2);">{t["bio"]}</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     st.link_button(t['wa_button'], "https://wa.me/33759823532", type="primary")
 
 # MAIN CONTENT
-
-# 1. HERO IMAGE (The "Beautiful Picture" - using a RELIABLE Unsplash URL)
 st.markdown("""
     <div class="hero-container">
-        <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=1000&auto=format&fit=crop" class="hero-img" alt="Renovation Security">
+        <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=600&auto=format&fit=crop" class="hero-img">
     </div>
 """, unsafe_allow_html=True)
 
-# 2. HEADERS (Animated)
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
 
-# 3. MAIN GLASS CARD (The "Unique" UI)
+# COMPACT GLASS CARD
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 c1, c2 = st.columns([1, 1])
 proj_display = list(t["projects"].values())
@@ -290,21 +260,20 @@ if file:
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
-    # RESULTS (Nested Glass Container)
-    st.markdown(f'<div style="background: rgba(255,255,255,0.5); padding: 25px; border-radius: 15px; border-left: 8px solid {color}; margin-top: 20px;">', unsafe_allow_html=True)
-    st.markdown(f"### 📊 {t['verdict']}: <span style='color:{color}'>{risk}</span>", unsafe_allow_html=True)
+    # RESULTS
+    st.markdown(f'<div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 10px; border-left: 5px solid {color}; margin-top: 15px;">', unsafe_allow_html=True)
+    st.markdown(f"### {t['verdict']}: <span style='color:{color}'>{risk}</span>", unsafe_allow_html=True)
     m1, m2 = st.columns(2)
     m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}", delta_color="inverse")
     m2.metric(t["metric_fair"], f"€{fair:,.0f}")
     st.plotly_chart(create_chart(price, fair, t), use_container_width=True)
     st.markdown("---")
-    st.markdown(f"#### 🏢 {c_name}")
+    st.markdown(f"**🏢 {c_name}**")
     c1, c2 = st.columns([3, 1])
     with c1: st.caption(f"📍 {c_addr}" if c_addr else t["addr_missing"])
     with c2: st.markdown(f"**{c_status}**")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
     if markup > 40:
         st.error(t["alert_title"])
         st.link_button(t["alert_btn"], f"https://wa.me/33759823532?text=HIGH%20RISK%20quote%20detected%20({price}EUR)")
@@ -312,15 +281,12 @@ if file:
         st.success(t["safe_title"])
         st.link_button(t["safe_btn"], f"https://wa.me/33759823532?text=Checking%20quote%20({price}EUR)")
 
-st.markdown('</div>', unsafe_allow_html=True) # End Glass Card
+st.markdown('</div>', unsafe_allow_html=True)
 
-# 4. FOOTER (Animated Badges)
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown(f'<div class="animate-enter" style="text-align: center; color: #64748B; margin-bottom: 20px;">{t["trust_title"]}</div>', unsafe_allow_html=True)
+# FOOTER
+st.markdown("<br>", unsafe_allow_html=True)
 b1, b2, b3 = st.columns(3)
-with b1: st.markdown(f'<div class="trust-badge animate-enter">⚡<br><b>{t["badge_fast"]}</b></div>', unsafe_allow_html=True)
-with b2: st.markdown(f'<div class="trust-badge animate-enter" style="animation-delay: 0.2s;">🏛️<br><b>{t["badge_gov"]}</b></div>', unsafe_allow_html=True)
-with b3: st.markdown(f'<div class="trust-badge animate-enter" style="animation-delay: 0.4s;">🔒<br><b>{t["badge_priv"]}</b></div>', unsafe_allow_html=True)
-
-st.markdown("---")
-st.markdown('<div style="text-align: center; color: #aaa; font-size: 12px;">© 2025 QuoteGuard AI. All rights reserved.</div>', unsafe_allow_html=True)
+with b1: st.markdown(f'<div style="text-align:center; font-size:12px; color:#64748B;">⚡ <b>{t["badge_fast"]}</b></div>', unsafe_allow_html=True)
+with b2: st.markdown(f'<div style="text-align:center; font-size:12px; color:#64748B;">🏛️ <b>{t["badge_gov"]}</b></div>', unsafe_allow_html=True)
+with b3: st.markdown(f'<div style="text-align:center; font-size:12px; color:#64748B;">🔒 <b>{t["badge_priv"]}</b></div>', unsafe_allow_html=True)
+st.markdown('<div style="text-align: center; color: #ccc; font-size: 10px; margin-top: 20px;">© 2025 QuoteGuard AI</div>', unsafe_allow_html=True)
