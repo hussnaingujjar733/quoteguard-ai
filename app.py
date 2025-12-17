@@ -15,82 +15,121 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. THE PREMIUM CSS ---
+# --- 2. THE V16 "MESH" CSS ---
 st.markdown("""
     <style>
+    /* IMPORT GOOGLE FONT (The "Startup" Look) */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
+    /* DYNAMIC MESH BACKGROUND */
     .stApp {
-        background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+        background-color: #F8FAFC;
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+            radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+            radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        background-size: 100% 100%;
+        background-attachment: fixed;
     }
 
-    /* HERO & IMAGES */
-    .hero-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 15px;
-        animation: fadeInUp 1s ease-out both;
+    /* GLASS CARD WITH GLOW BORDER */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 15px;
+        animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    .hero-img {
-        width: 100%;
-        max-width: 250px;
+
+    /* NEGOTIATION CARD (Money Maker) */
+    .negotiation-card {
+        background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        border: 1px solid #86EFAC;
+        padding: 20px;
         border-radius: 12px;
+        margin-top: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+    }
+    .negotiation-card:hover {
+        transform: translateY(-2px);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    /* GLASS CARD */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        border-radius: 15px;
-        padding: 25px;
-        margin-top: 10px;
+    /* HERO IMAGE */
+    .hero-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        animation: fadeIn 1.2s ease-out;
+    }
+    .hero-img {
+        width: 100%;
+        max-width: 280px;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        transform: rotate(-1deg); /* Slight tilt for style */
+        transition: transform 0.3s ease;
+    }
+    .hero-img:hover {
+        transform: rotate(0deg) scale(1.02);
     }
 
-    /* NEGOTIATION CARD (New) */
-    .negotiation-card {
-        background: #F0FDF4;
-        border: 1px solid #BBF7D0;
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 15px;
-        animation: fadeInUp 1.5s ease-out both;
-    }
-
-    /* SIDEBAR */
+    /* SIDEBAR STYLE */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(255,255,255,0.1);
     }
     [data-testid="stSidebar"] * {
-        color: #E2E8F0 !important;
+        color: #F1F5F9 !important;
     }
 
     /* TYPOGRAPHY */
     .title-text { 
-        font-size: 36px; 
+        font-size: 40px; 
         font-weight: 800; 
-        color: #0F172A; 
+        color: #FFFFFF; /* White title on dark background */
         text-align: center; 
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-bottom: 5px;
     }
     .subtitle-text { 
         font-size: 16px; 
-        color: #64748B; 
+        color: #CBD5E1; 
         text-align: center; 
-        margin-bottom: 15px;
+        margin-bottom: 25px;
+        font-weight: 400;
     }
-    
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translate3d(0, 20px, 0); }
-        to { opacity: 1; transform: none; }
-    }
-    .animate-enter { animation: fadeInUp 0.8s ease-out both; }
 
+    /* ANIMATIONS */
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-enter { animation: slideUp 0.6s ease-out both; }
+
+    /* PROFILE PICTURE */
     .profile-img {
         border-radius: 50%;
-        border: 2px solid #3B82F6;
-        padding: 2px;
+        border: 3px solid #60A5FA;
+        padding: 3px;
+        box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -194,7 +233,7 @@ def create_chart(user, fair, t):
     fig.update_layout(
         barmode='group', height=200, margin=dict(l=10, r=10, t=30, b=10),
         title_text=t["chart_title"], plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="sans-serif", size=12)
+        font=dict(family="Plus Jakarta Sans", size=12)
     )
     return fig
 
@@ -206,11 +245,12 @@ with st.sidebar:
     img = get_img_as_base64("profile.jpeg")
     if img:
         st.markdown(f'<div style="display: flex; justify-content: center;"><img src="data:image/jpeg;base64,{img}" class="profile-img" style="width: 120px; height: 120px; object-fit: cover;"></div>', unsafe_allow_html=True)
-    st.markdown(f'<div style="text-align: center; margin-top: 15px;"><h3 style="margin:0; color:white;">Hussnain</h3><p style="opacity: 0.8; font-size: 12px; color:#cbd5e1;">{t["role"]}</p></div>', unsafe_allow_html=True)
-    st.markdown(f'<div style="background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.2);">{t["bio"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align: center; margin-top: 15px;"><h3 style="margin:0; color:white; font-weight:800;">Hussnain</h3><p style="opacity: 0.8; font-size: 12px; color:#cbd5e1;">{t["role"]}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; font-size: 12px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.1); line-height: 1.4;">{t["bio"]}</div>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     st.link_button(t['wa_button'], "https://wa.me/33759823532", type="primary")
 
+# HERO SECTION
 st.markdown("""
     <div class="hero-container">
         <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=600&auto=format&fit=crop" class="hero-img">
@@ -220,6 +260,7 @@ st.markdown("""
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
 
+# MAIN CARD
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 c1, c2 = st.columns([1, 1])
 proj_display = list(t["projects"].values())
@@ -247,15 +288,15 @@ if file:
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
-    # 1. MAIN RESULTS
-    st.markdown(f'<div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 10px; border-left: 5px solid {color}; margin-top: 15px;">', unsafe_allow_html=True)
+    # RESULTS DISPLAY
+    st.markdown(f'<div style="background: rgba(255,255,255,0.7); padding: 20px; border-radius: 12px; border-left: 6px solid {color}; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">', unsafe_allow_html=True)
     st.markdown(f"### {t['verdict']}: <span style='color:{color}'>{risk}</span>", unsafe_allow_html=True)
     m1, m2 = st.columns(2)
     m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}", delta_color="inverse")
     m2.metric(t["metric_fair"], f"€{fair:,.0f}")
     st.plotly_chart(create_chart(price, fair, t), use_container_width=True)
     
-    # 2. COMPANY INFO
+    # COMPANY INFO
     st.markdown("---")
     st.markdown(f"**🏢 {c_name}**")
     c1, c2 = st.columns([3, 1])
@@ -263,30 +304,33 @@ if file:
     with c2: st.markdown(f"**{c_status}**")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 3. THE MONEY MAKER SECTION
+    # MONEY MAKER SECTION
     st.markdown("<br>", unsafe_allow_html=True)
     if markup > 40:
-        # LOSS AVERSION ALERT
         st.error(f"{t['alert_title']} €{difference:,.0f}!")
         
-        # AI NEGOTIATOR (NEW FEATURE)
+        # NEGOTIATION CARD
         st.markdown(f"""
         <div class="negotiation-card">
             <h4>{t['nego_title']} 🤖</h4>
-            <p>{t['nego_desc']}</p>
-            <code style="background: white; padding: 10px; display: block; border-radius: 5px; color: #333;">
-                "Bonjour, j'ai bien reçu votre devis de {price}€. Cependant, après vérification des prix du marché parisien pour ce type de travaux, la moyenne se situe autour de {fair}€. Pouvez-vous revoir votre offre pour vous rapprocher de ce montant ? Merci."
-            </code>
+            <p style="font-size:14px; color:#4B5563;">{t['nego_desc']}</p>
+            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px dashed #CBD5E1; color: #333; font-family: monospace; font-size: 13px;">
+                "Bonjour, j'ai bien reçu votre devis de {price}€. Après vérification des standards parisiens, la moyenne est de {fair}€. Pouvez-vous revoir votre offre ? Merci."
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
-        st.link_button(t["alert_btn"], f"https://wa.me/33759823532?text=I%20need%20help%20negotiating%20a%20quote%20of%20{price}EUR")
+        st.link_button(t["alert_btn"], f"https://wa.me/33759823532?text=Help%20me%20negotiate%20{price}EUR", type="primary")
     else:
         st.success(f"{t['safe_title']} €{abs(difference):,.0f}!")
-        st.link_button(t["safe_btn"], f"https://wa.me/33759823532?text=Checking%20quote%20({price}EUR)")
+        st.link_button(t["safe_btn"], f"https://wa.me/33759823532?text=Quote%20Check%20Passed", type="secondary")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# FOOTER
+# FOOTER BADGES
 st.markdown("<br>", unsafe_allow_html=True)
-st.caption("© 2025 QuoteGuard AI - Paris")
+b1, b2, b3 = st.columns(3)
+with b1: st.markdown('<div style="text-align:center; opacity:0.7; font-size:12px;">⚡ Fast</div>', unsafe_allow_html=True)
+with b2: st.markdown('<div style="text-align:center; opacity:0.7; font-size:12px;">🏛️ Official</div>', unsafe_allow_html=True)
+with b3: st.markdown('<div style="text-align:center; opacity:0.7; font-size:12px;">🔒 Secure</div>', unsafe_allow_html=True)
+st.caption("© 2025 QuoteGuard AI")
