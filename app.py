@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Analytics Dashboard Edition
+# QuoteGuard – Analytics Dashboard Edition (FIXED)
 # ==============================
 # Run: streamlit run app.py
 
@@ -104,6 +104,7 @@ TRANSLATIONS = {
         "verdict": "Trust Score",
         "metric_quote": "Quoted Price",
         "metric_fair": "Smart Estimate",
+        "metric_markup": "vs Estimate",  # ADDED MISSING KEY
         "chart_title": "Fairness Gauge",
         "risk_high": "HIGH RISK",
         "risk_safe": "FAIR PRICE",
@@ -154,6 +155,7 @@ TRANSLATIONS = {
         "verdict": "Score de Confiance",
         "metric_quote": "Montant du Devis",
         "metric_fair": "Estimation Intelligente",
+        "metric_markup": "Écart vs Est.",  # ADDED MISSING KEY
         "chart_title": "Jauge de Confiance",
         "risk_high": "RISQUE ÉLEVÉ",
         "risk_safe": "PRIX CORRECT",
@@ -395,7 +397,7 @@ if file or st.session_state.demo_mode:
     # Calculate Trust Score (0-100)
     diff = price - fair
     markup = int(((price - fair) / fair) * 100)
-    score = max(0, min(100, 100 - markup)) # 100 is perfect, 0 is very bad
+    score = max(0, min(100, 100 - markup))
     
     risk = t["risk_high"] if score < 60 else t["risk_safe"]
     
