@@ -7,33 +7,33 @@ import requests
 import plotly.graph_objects as go
 import base64
 
-# --- 1. CONFIGURATION (Hidden Sidebar) ---
+# --- 1. CONFIGURATION (Sidebar VISIBLE) ---
 st.set_page_config(
     page_title="QuoteGuard AI",
     page_icon="🛡️",
     layout="centered",
-    initial_sidebar_state="collapsed" # <--- THIS MAKES IT HIDDEN BY DEFAULT
+    initial_sidebar_state="expanded" # <--- CHANGED: Now it stays open!
 )
 
-# --- 2. THE DESIGNER CSS (The Magic) ---
+# --- 2. THE DESIGNER CSS ---
 st.markdown("""
     <style>
-    /* 1. HIDE DEFAULT STREAMLIT JUNK */
+    /* Hide Default Streamlit Menu */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* 2. SIDEBAR TRANSFORMATION (Dark Gradient) */
+    /* SIDEBAR STYLE (Dark Gradient) */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
         color: white !important;
     }
     /* Force Sidebar Text to be White */
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
         color: #E2E8F0 !important;
     }
 
-    /* 3. PROFILE IMAGE ANIMATION (Breathing Effect) */
+    /* PROFILE ANIMATION (Breathing Effect) */
     @keyframes breathe {
         0% { transform: scale(1); box-shadow: 0 0 0px rgba(59, 130, 246, 0.0); }
         50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
@@ -46,39 +46,26 @@ st.markdown("""
         transition: all 0.3s ease;
     }
 
-    /* 4. MAIN CARD STYLING (Clean White) */
+    /* CARD STYLE (Clean White) */
     .card {
         padding: 30px;
         border-radius: 20px;
         background-color: white;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         border: 1px solid #F1F5F9;
         margin-bottom: 25px;
         transition: transform 0.2s;
     }
-    .card:hover {
-        transform: translateY(-2px); /* Slight lift on hover */
-    }
+    .card:hover { transform: translateY(-2px); }
 
-    /* 5. TYPOGRAPHY */
-    .title-text { font-size: 48px; font-weight: 800; color: #0F172A; text-align: center; font-family: 'Inter', sans-serif; letter-spacing: -1px; }
+    /* TYPOGRAPHY */
+    .title-text { font-size: 48px; font-weight: 800; color: #0F172A; text-align: center; font-family: sans-serif; letter-spacing: -1px; }
     .subtitle-text { font-size: 18px; color: #64748B; text-align: center; margin-bottom: 40px; font-weight: 400; }
     
-    /* 6. BUTTONS */
-    .stButton>button {
-        width: 100%;
-        border-radius: 12px;
-        height: 50px;
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s;
-    }
-    .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+    /* BUTTONS */
+    .stButton>button { width: 100%; border-radius: 12px; height: 50px; font-weight: 600; border: none; }
     
-    /* 7. TRUST BADGES */
+    /* TRUST BADGES */
     .trust-badge {
         text-align: center;
         padding: 15px;
@@ -91,7 +78,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- TRANSLATIONS (Keep V8 Logic) ---
+# --- TRANSLATIONS ---
 TRANSLATIONS = {
     "English": {
         "role": "Lead Data Scientist",
@@ -101,7 +88,6 @@ TRANSLATIONS = {
         "subtitle": "Paris Renovation Verification Engine",
         "proj_label": "Project Category",
         "upload_label": "Upload Devis (PDF)",
-        "upload_type": ["pdf"],
         "prog_init": "Initializing AI...",
         "prog_check": "🔎 Checking Gov Database...",
         "prog_done": "✅ Done",
@@ -136,7 +122,6 @@ TRANSLATIONS = {
         "subtitle": "Vérificateur de Devis Travaux",
         "proj_label": "Type de Projet",
         "upload_label": "Télécharger Devis (PDF)",
-        "upload_type": ["pdf"],
         "prog_init": "Démarrage de l'IA...",
         "prog_check": "🔎 Vérification SIRET...",
         "prog_done": "✅ Terminé",
@@ -211,13 +196,13 @@ def create_chart(user, fair, t):
 
 # SIDEBAR (Dark Mode & Animated)
 with st.sidebar:
-    # Language Toggle (Custom styled radio)
+    # Language Toggle
     lang = st.radio("🌐 Language / Langue", ["English", "Français"], horizontal=True)
     t = TRANSLATIONS[lang]
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Animated Profile Picture (CSS Class 'profile-img')
+    # Animated Profile Picture
     img = get_img_as_base64("profile.jpeg")
     if img:
         st.markdown(f"""
@@ -253,7 +238,6 @@ with c2: file = st.file_uploader(t["upload_label"], type=["pdf"])
 st.markdown('</div>', unsafe_allow_html=True)
 
 if file:
-    # 2. ANALYSIS ANIMATION
     bar = st.progress(0, t["prog_init"])
     time.sleep(0.5)
     price, siret, _ = extract_data_from_pdf(file)
@@ -273,7 +257,7 @@ if file:
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
-    # 3. RESULT CARD (With dynamic colored border)
+    # 3. RESULT CARD
     st.markdown(f'<div class="card" style="border-left: 8px solid {color};">', unsafe_allow_html=True)
     st.markdown(f"### 📊 {t['verdict']}: <span style='color:{color}'>{risk}</span>", unsafe_allow_html=True)
     
@@ -298,7 +282,7 @@ if file:
         st.success(t["safe_title"])
         st.link_button(t["safe_btn"], f"https://wa.me/33759823532?text=Checking%20quote%20({price}EUR)")
 
-# 5. SOCIAL PROOF (Footer)
+# 5. SOCIAL PROOF
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(f'<div style="text-align: center; color: #64748B; margin-bottom: 20px;">{t["trust_title"]}</div>', unsafe_allow_html=True)
 b1, b2, b3 = st.columns(3)
