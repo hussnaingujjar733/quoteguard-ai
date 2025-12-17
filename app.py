@@ -61,10 +61,11 @@ def analyze_quote(project_type):
 # 1. Header & Branding
 col1, col2 = st.columns([1, 5])
 with col1:
-    st.write("## 🛡️") # You can replace this with st.image("logo.png") later
+    st.write("## 🛡️") 
 with col2:
     st.title("QuoteGuard AI (Paris Edition)")
     st.markdown("**The AI that protects Expats from Renovation Scams.** Upload your *Devis* to check if you are being overcharged.")
+    st.caption("ℹ️ BETA VERSION: Instant automated check. For a 100% accurate manual review, use the WhatsApp button below.")
 
 st.markdown("---")
 
@@ -130,9 +131,9 @@ if uploaded_file is not None:
                 st.text_area("Copy this to your artisan:", 
                              f"Bonjour,\n\nJ'ai bien reçu votre devis de {quote_total}€.\nCependant, après vérification des prix du marché (Leroy Merlin & Tarifs Artisans Paris), ce montant semble élevé.\nLe prix moyen constaté pour ces travaux est de {fair_total}€.\n\nPouvons-nous revoir ce montant ?\n\nCordialement.")
         with c2:
-            if st.button("🚨 Get a Verified Artisan Instead"):
-                st.balloons()
-                st.success("Request sent! Our verified partner will contact you within 2 hours.")
+            # YOUR WHATSAPP NUMBER IS HERE
+            whatsapp_url = "https://wa.me/33759823532?text=Hello%20QuoteGuard,%20I%20just%20uploaded%20a%20quote%20and%20it%20seems%20high.%20Can%20you%20help%20me%20check%20it?"
+            st.link_button("🚨 Chat with an Expert Now (WhatsApp)", whatsapp_url)
 
 else:
     # Show some empty state stats to make it look professional
