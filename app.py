@@ -59,21 +59,24 @@ st.markdown("""
         animation: pulse-blue 3s infinite;
     }
 
-    /* HERO IMAGE STYLE */
+    /* HERO IMAGE STYLE (FIXED) */
     .hero-container {
         display: flex;
         justify-content: center;
         margin-bottom: 20px;
         animation: fadeInUp 1s ease-out both;
+        overflow: hidden;
+        border-radius: 20px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
     .hero-img {
         width: 100%;
-        max-width: 400px;
+        max-width: 600px; /* Made it slightly wider for cinematic look */
         height: auto;
-        filter: drop-shadow(0 10px 15px rgba(59, 130, 246, 0.2));
+        object-fit: cover;
     }
 
-    /* GLASSMORPHISM CARD (The "Expensive" Look) */
+    /* GLASSMORPHISM CARD */
     .glass-card {
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(12px);
@@ -249,10 +252,10 @@ with st.sidebar:
 
 # MAIN CONTENT
 
-# 1. HERO IMAGE (The "Beautiful Picture" - using a reliable external URL for a premium illustration)
+# 1. HERO IMAGE (The "Beautiful Picture" - using a RELIABLE Unsplash URL)
 st.markdown("""
     <div class="hero-container">
-        <img src="https://i.imgur.com/8Q5X3yQ.png" class="hero-img" alt="Renovation Security">
+        <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=1000&auto=format&fit=crop" class="hero-img" alt="Renovation Security">
     </div>
 """, unsafe_allow_html=True)
 
