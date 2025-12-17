@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Smart AI Edition (Keyword Pricing)
+# QuoteGuard – Smart AI Edition (FIXED)
 # ==============================
 # Run: streamlit run app.py
 
@@ -189,6 +189,14 @@ TRANSLATIONS = {
     }
 }
 
+# ---------- HELPERS ----------
+def get_img_as_base64(path):
+    try:
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except Exception:
+        return None
+
 # ---------- SMART EXTRACTION LOGIC ----------
 def extract_data(file):
     text = ""
@@ -243,16 +251,16 @@ def calculate_smart_fair_price(text, region_multiplier):
     # Scan text for keywords
     for key, data in keywords.items():
         if key in text:
-            # Avoid duplicate labels (e.g. wc and toilet)
+            # Avoid duplicate labels
             if data['name'] not in [i['name'] for i in items_found]:
                 local_cost = data['cost'] * region_multiplier
                 items_found.append({"name": data['name'], "cost": local_cost})
                 running_total += local_cost
 
-    # Fallback if no keywords found (use generic average)
+    # Fallback if no keywords found
     if running_total == 0:
         running_total = 1500 * region_multiplier
-        items_found.append({"name": "Estimation Standard (No Keywords)", "cost": running_total})
+        items_found.append({"name": "Estimation Standard", "cost": running_total})
         
     return running_total, items_found
 
