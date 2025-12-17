@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Smart AI Edition (FIXED)
+# QuoteGuard – Analytics Dashboard Edition
 # ==============================
 # Run: streamlit run app.py
 
@@ -34,8 +34,8 @@ if 'demo_mode' not in st.session_state:
 def activate_demo():
     st.session_state.demo_mode = True
 
-def add_to_history(project, price, risk):
-    st.session_state.history.insert(0, {"time": datetime.now().strftime("%H:%M"), "project": project, "price": price, "risk": risk})
+def add_to_history(project, price, score):
+    st.session_state.history.insert(0, {"time": datetime.now().strftime("%H:%M"), "project": project, "price": price, "score": score})
     st.session_state.history = st.session_state.history[:5]
 
 # ---------- CSS ----------
@@ -101,16 +101,15 @@ TRANSLATIONS = {
         "prog_init": "Reading Document...",
         "prog_check": "🔎 Detecting Items (OCR)...",
         "prog_done": "✅ Smart Analysis Complete",
-        "verdict": "Audit Verdict",
+        "verdict": "Trust Score",
         "metric_quote": "Quoted Price",
         "metric_fair": "Smart Estimate",
-        "metric_markup": "vs Estimate",
-        "chart_title": "Price Analysis",
-        "risk_high": "HIGH OVERCHARGE RISK",
+        "chart_title": "Fairness Gauge",
+        "risk_high": "HIGH RISK",
         "risk_safe": "FAIR PRICE",
         "alert_title": "⚠️ Potential overcharge detected:",
         "alert_btn": "🚨 Speak with an Expert",
-        "safe_title": "✅ Quote appears fair.",
+        "safe_title": "✅ Excellent Price! You are saving money.",
         "safe_btn": "💬 Confirm with Expert",
         "nego_title": "💡 Negotiation Strategy",
         "nego_desc": "We found these items in your quote. Use this logic:",
@@ -136,7 +135,9 @@ TRANSLATIONS = {
         "email_btn": "📧 Email Report",
         "feedback": "Was this helpful?",
         "stripe_url": "https://buy.stripe.com/test_12345",
-        "detected_items": "🔍 AI Detected Items:"
+        "detected_items": "🔍 AI Detected Items:",
+        "match_title": "👷 Need a better price?",
+        "match_btn": "Get 3 Verified Quotes"
     },
     "Français": {
         "role": "Expertise & Audit National",
@@ -150,16 +151,15 @@ TRANSLATIONS = {
         "prog_init": "Lecture du document...",
         "prog_check": "🔎 Détection des travaux (OCR)...",
         "prog_done": "✅ Analyse Intelligente Terminée",
-        "verdict": "Verdict de l'Audit",
+        "verdict": "Score de Confiance",
         "metric_quote": "Montant du Devis",
         "metric_fair": "Estimation Intelligente",
-        "metric_markup": "Écart vs Est.",
-        "chart_title": "Analyse des Prix",
-        "risk_high": "RISQUE DE SURFACTURATION",
+        "chart_title": "Jauge de Confiance",
+        "risk_high": "RISQUE ÉLEVÉ",
         "risk_safe": "PRIX CORRECT",
         "alert_title": "⚠️ Écart critique détecté :",
         "alert_btn": "🚨 Parler à un Expert",
-        "safe_title": "✅ Devis conforme.",
+        "safe_title": "✅ Excellent Prix ! Vous économisez.",
         "safe_btn": "💬 Valider ce devis",
         "nego_title": "💡 Stratégie de Négociation",
         "nego_desc": "Voici les éléments détectés. Utilisez cet argumentaire :",
@@ -185,7 +185,9 @@ TRANSLATIONS = {
         "email_btn": "📧 Envoyer par Email",
         "feedback": "Cet audit a-t-il été utile ?",
         "stripe_url": "https://buy.stripe.com/test_12345",
-        "detected_items": "🔍 Travaux Détectés par l'IA :"
+        "detected_items": "🔍 Travaux Détectés par l'IA :",
+        "match_title": "👷 Besoin d'un meilleur prix ?",
+        "match_btn": "Recevoir 3 Devis Vérifiés"
     }
 }
 
@@ -197,7 +199,6 @@ def get_img_as_base64(path):
     except Exception:
         return None
 
-# ---------- SMART EXTRACTION LOGIC ----------
 def extract_data(file):
     text = ""
     try:
@@ -217,47 +218,30 @@ def extract_data(file):
     except Exception as e:
         return 0.0, None, ""
 
-# ---------- SMART PRICING ENGINE (THE BRAIN) ----------
 def calculate_smart_fair_price(text, region_multiplier):
     text = text.lower()
     items_found = []
     running_total = 0
-    
-    # DATABASE OF UNIT COSTS (PARIS BASELINE)
     keywords = {
         "wc": {"cost": 800, "name": "Toilette / WC"},
         "toilet": {"cost": 800, "name": "Toilette / WC"},
         "lavabo": {"cost": 600, "name": "Lavabo / Sink"},
-        "sink": {"cost": 600, "name": "Lavabo / Sink"},
         "douche": {"cost": 1500, "name": "Douche / Shower"},
-        "shower": {"cost": 1500, "name": "Douche / Shower"},
         "baignoire": {"cost": 1800, "name": "Baignoire / Bath"},
-        "bath": {"cost": 1800, "name": "Baignoire / Bath"},
         "chauffe-eau": {"cost": 1200, "name": "Chauffe-eau / Heater"},
-        "ballon": {"cost": 1200, "name": "Ballon d'eau"},
-        "peinture": {"cost": 2000, "name": "Forfait Peinture"}, # Simplified
-        "painting": {"cost": 2000, "name": "Painting Package"},
+        "peinture": {"cost": 2000, "name": "Forfait Peinture"},
         "carrelage": {"cost": 1500, "name": "Carrelage / Tiling"},
-        "tile": {"cost": 1500, "name": "Carrelage / Tiling"},
         "tableau": {"cost": 1500, "name": "Tableau Élec / Panel"},
-        "prise": {"cost": 150, "name": "Prise / Socket"},
         "cuisine": {"cost": 4000, "name": "Cuisine / Kitchen"},
-        "kitchen": {"cost": 4000, "name": "Cuisine / Kitchen"},
         "fenêtre": {"cost": 1000, "name": "Fenêtre / Window"},
-        "window": {"cost": 1000, "name": "Fenêtre / Window"},
         "porte": {"cost": 800, "name": "Porte / Door"}
     }
-    
-    # Scan text for keywords
     for key, data in keywords.items():
-        if key in text:
-            # Avoid duplicate labels
-            if data['name'] not in [i['name'] for i in items_found]:
-                local_cost = data['cost'] * region_multiplier
-                items_found.append({"name": data['name'], "cost": local_cost})
-                running_total += local_cost
+        if key in text and data['name'] not in [i['name'] for i in items_found]:
+            local_cost = data['cost'] * region_multiplier
+            items_found.append({"name": data['name'], "cost": local_cost})
+            running_total += local_cost
 
-    # Fallback if no keywords found
     if running_total == 0:
         running_total = 1500 * region_multiplier
         items_found.append({"name": "Estimation Standard", "cost": running_total})
@@ -276,13 +260,36 @@ def check_siret(siret):
         pass
     return "Unknown", "CHECK", ""
 
-def chart(user_price, fair_price, title):
-    fig = go.Figure([
-        go.Bar(name="AI Estimate", x=["Cost"], y=[fair_price], marker_color='#22C55E'),
-        go.Bar(name="Your Quote", x=["Cost"], y=[user_price], marker_color='#EF4444')
-    ])
-    fig.update_layout(barmode="group", height=220, title=title,
-                      plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+# ---------- NEW: GAUGE CHART ----------
+def create_gauge(score, title):
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = score,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': title, 'font': {'size': 24}},
+        gauge = {
+            'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+            'bar': {'color': "#3b82f6"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps': [
+                {'range': [0, 50], 'color': '#ef4444'},
+                {'range': [50, 75], 'color': '#f59e0b'},
+                {'range': [75, 100], 'color': '#22c55e'}],
+            'threshold': {
+                'line': {'color': "black", 'width': 4},
+                'thickness': 0.75,
+                'value': score}}))
+    fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20), paper_bgcolor="rgba(0,0,0,0)")
+    return fig
+
+# ---------- NEW: DONUT CHART ----------
+def create_donut(items, labor_est):
+    labels = [i['name'] for i in items] + ["Main d'oeuvre (Est.)"]
+    values = [i['cost'] for i in items] + [labor_est]
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.4)])
+    fig.update_layout(height=250, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor="rgba(0,0,0,0)", showlegend=False)
     return fig
 
 def create_pdf(t, project, region, name, status, addr, price, fair, diff, risk, items):
@@ -322,15 +329,10 @@ def create_pdf(t, project, region, name, status, addr, price, fair, diff, risk, 
     pdf.cell(0, 10, f"{price:,.2f} EUR", border=1, ln=True)
     pdf.cell(100, 10, clean_text(t["metric_fair"]), border=1)
     pdf.cell(0, 10, f"{fair:,.2f} EUR", border=1, ln=True)
-    pdf.cell(100, 10, "Difference", border=1)
-    pdf.cell(0, 10, f"{diff:,.2f} EUR", border=1, ln=True)
     pdf.ln(5)
     
-    color = (200, 50, 50) if "HIGH" in risk or "RISQUE" in risk else (50, 150, 50)
-    pdf.set_text_color(*color)
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, clean_text(f"VERDICT: {risk}"), ln=True, align="C")
-    pdf.set_text_color(0, 0, 0)
     
     pdf.set_y(-30)
     pdf.set_font("Arial", "I", 8)
@@ -351,8 +353,8 @@ if len(st.session_state.history) > 0:
     st.sidebar.markdown("---")
     st.sidebar.markdown(f"**{t['hist_title']}**")
     for item in st.session_state.history:
-        color = "🔴" if "HIGH" in item['risk'] or "RISQUE" in item['risk'] else "🟢"
-        st.sidebar.markdown(f"""<div class="history-item">{color} <b>{item['price']:,.0f}€</b><br><span style="opacity:0.7">{item['time']}</span></div>""", unsafe_allow_html=True)
+        color = "🔴" if item['score'] < 50 else "🟢"
+        st.sidebar.markdown(f"""<div class="history-item">{color} <b>{item['price']:,.0f}€</b> (Score: {item['score']})<br><span style="opacity:0.7">{item['time']}</span></div>""", unsafe_allow_html=True)
 
 # ---------- MAIN UI ----------
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
@@ -380,50 +382,68 @@ if file or st.session_state.demo_mode:
         st.info("⚡ DEMO MODE: Simulating Quote...")
         time.sleep(1.0)
         price = 18500.0
-        full_text = "Devis Rénovation: Peinture, Cuisine, Electricité, Salle de Bain (Douche, Lavabo, WC)"
+        full_text = "Devis: Peinture, Cuisine, Electricité, Salle de Bain (Douche, Lavabo, WC)"
         name = "Renov' Smart SAS"
         status = t["active"]
         addr = "Paris"
 
     if price == 0: price = 1500.0
     
-    # SMART CALCULATION
     multiplier = REGIONS[region]
     fair, detected_items = calculate_smart_fair_price(full_text, multiplier)
 
-    markup = int(((price - fair) / fair) * 100)
+    # Calculate Trust Score (0-100)
     diff = price - fair
-    risk = t["risk_high"] if markup > 40 else t["risk_safe"]
-    color = "#EF4444" if markup > 40 else "#22C55E"
+    markup = int(((price - fair) / fair) * 100)
+    score = max(0, min(100, 100 - markup)) # 100 is perfect, 0 is very bad
     
-    if not st.session_state.demo_mode: add_to_history(project, price, risk)
+    risk = t["risk_high"] if score < 60 else t["risk_safe"]
+    
+    if not st.session_state.demo_mode: add_to_history(project, price, score)
 
-    # UI RESULTS
-    st.markdown(f"### {t['verdict']}: **:{color}[{risk}]**")
-    m1, m2 = st.columns(2)
-    m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}")
-    m2.metric(t["metric_fair"], f"€{fair:,.0f}", "Smart Estimate")
-    st.plotly_chart(chart(price, fair, t["chart_title"]), use_container_width=True)
-
-    # DETECTED ITEMS TAGS
-    st.markdown(f"**{t['detected_items']}**")
-    tags_html = ""
-    for item in detected_items:
-        tags_html += f'<span class="item-tag">{item["name"]} ({item["cost"]:.0f}€)</span>'
-    st.markdown(f"<div>{tags_html}</div><br>", unsafe_allow_html=True)
+    # 1. SCORE DASHBOARD
+    g1, g2 = st.columns([1.5, 1])
+    with g1:
+        st.plotly_chart(create_gauge(score, t["verdict"]), use_container_width=True)
+    with g2:
+        st.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}", delta_color="inverse")
+        st.metric(t["metric_fair"], f"€{fair:,.0f}", "Smart Estimate")
+    
+    # 2. SUCCESS CONFETTI
+    if score >= 75:
+        st.balloons()
+        st.success(f"{t['safe_title']} €{abs(diff):,.0f}!")
+    else:
+        st.error(f"{t['alert_title']} €{diff:,.0f}")
+        
+    # 3. DETECTED ITEMS & DONUT
+    st.markdown("---")
+    c_list, c_chart = st.columns(2)
+    with c_list:
+        st.markdown(f"**{t['detected_items']}**")
+        for item in detected_items:
+            st.markdown(f"• {item['name']} (~{item['cost']:.0f}€)")
+    with c_chart:
+         st.plotly_chart(create_donut(detected_items, fair*0.3), use_container_width=True)
 
     st.markdown(f"**🏢 {name}**")
     st.caption(status)
 
-    if markup > 40:
-        st.error(f"{t['alert_title']} €{diff:,.0f}")
-    else:
-        st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
+    # 4. LEAD GEN (If Score is Low)
+    if score < 60:
+        st.markdown(f"""
+        <div style="background:#fff7ed; border:1px solid #f97316; padding:15px; border-radius:10px; text-align:center; margin-top:20px;">
+            <h4 style="color:#c2410c; margin:0;">{t['match_title']}</h4>
+            <p style="font-size:13px; color:#9a3412;">Don't overpay. Compare with top-rated local pros.</p>
+            <button style="background:#ea580c; color:white; border:none; padding:8px 16px; border-radius:5px; font-weight:bold;">{t['match_btn']}</button>
+        </div>
+        """, unsafe_allow_html=True)
 
+    # ACTIONS
     st.markdown("---")
     c_act1, c_act2 = st.columns(2)
     pdf_data = create_pdf(t, project, region, name, status, addr, price, fair, diff, risk, detected_items)
-    c_act1.download_button(label="📄 " + ("Download PDF" if lang == "English" else "Télécharger PDF"), data=pdf_data, file_name="QuoteGuard_SmartAudit.pdf", mime="application/pdf")
+    c_act1.download_button(label="📄 " + ("Download PDF" if lang == "English" else "Télécharger PDF"), data=pdf_data, file_name="QuoteGuard_Audit.pdf", mime="application/pdf")
     
     subject = urllib.parse.quote("Audit QuoteGuard")
     body = urllib.parse.quote(f"Price: {price}EUR\nFair: {fair}EUR")
