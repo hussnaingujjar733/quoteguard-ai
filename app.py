@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Final Production Version
+# QuoteGuard – Final SaaS Version
 # ==============================
 # Run: streamlit run app.py
 
@@ -183,13 +183,10 @@ def chart(user_price, fair_price, title):
 
 # ---------- FIXED PDF GENERATOR ----------
 def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
-    # Inner function to clean text for FPDF (latin-1 only)
     def clean_text(text):
         if not isinstance(text, str):
             text = str(text)
-        # 1. Replace known problematic characters
         text = text.replace("€", "EUR").replace("•", "-").replace("’", "'").replace("…", "...")
-        # 2. Force encoding to latin-1, replacing unknown chars (like emojis) with '?'
         return text.encode('latin-1', 'replace').decode('latin-1')
 
     pdf = FPDF()
@@ -205,7 +202,7 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
     pdf.line(10, 30, 200, 30)
     pdf.ln(10)
     
-    # Details Section
+    # Details
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, f"DATE: {datetime.now().strftime('%Y-%m-%d')}", ln=True)
     pdf.set_font("Arial", "", 12)
@@ -214,13 +211,12 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
     pdf.cell(0, 10, clean_text(f"Address: {addr}"), ln=True)
     pdf.ln(5)
     
-    # Financials Section
+    # Financials
     pdf.set_fill_color(240, 240, 240)
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, "FINANCIAL ANALYSIS", ln=True, fill=True)
     pdf.set_font("Arial", "", 12)
     
-    # Table Rows
     pdf.cell(100, 10, clean_text(t["metric_quote"]), border=1)
     pdf.cell(0, 10, f"{price:,.2f} EUR", border=1, ln=True)
     
@@ -232,7 +228,6 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
     pdf.ln(5)
     
     # Verdict
-    # Safe color logic
     if "HIGH" in risk or "RISQUE" in risk:
         pdf.set_text_color(200, 50, 50) # Red
     else:
@@ -240,14 +235,13 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
         
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, clean_text(f"VERDICT: {risk}"), ln=True, align="C")
-    pdf.set_text_color(0, 0, 0) # Reset color
+    pdf.set_text_color(0, 0, 0)
     
     # Footer
     pdf.set_y(-30)
     pdf.set_font("Arial", "I", 8)
     pdf.multi_cell(0, 5, clean_text(t["disclaimer"]))
     
-    # Return binary data safe for Streamlit
     return pdf.output(dest="S").encode("latin-1")
 
 # ---------- SIDEBAR ----------
@@ -283,7 +277,7 @@ c1, c2 = st.columns(2)
 project = c1.selectbox(t["proj_label"], list(t["projects"].values()))
 file = c2.file_uploader(t["upload_label"], type=["pdf"])
 
-# ---------- PROCESS ----------
+# ---------- PROCESS OR LANDING PAGE ----------
 if file:
     bar = st.progress(0, t["prog_init"])
     time.sleep(0.4)
@@ -343,9 +337,8 @@ if file:
         st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
         st.link_button(t["safe_btn"], "https://wa.me/33759823532")
 
-    # ---------- PDF REPORT (NEW) ----------
+    # ---------- PDF REPORT ----------
     st.markdown("---")
-    # Call the FIXED create_pdf function
     pdf_data = create_pdf(t, project, name, status, addr, price, fair, diff, risk)
     
     st.download_button(
@@ -394,6 +387,58 @@ if file:
             <a href="https://wa.me/33759823532?text=I%20am%20interested%20in%20the%20Expert%20Audit%20for%2029EUR" target="_blank" style="display:block; background:#166534; color:white; text-align:center; padding:10px; border-radius:6px; text-decoration:none; font-weight:600; margin-top:15px;">{t['cta_paid']}</a>
         </div>
         """, unsafe_allow_html=True)
+
+else:
+    # ---------- LANDING PAGE CONTENT (When no file uploaded) ----------
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # 1. HOW IT WORKS
+    st.markdown(f"### ⚡ {('How it works' if lang == 'English' else 'Comment ça marche')}")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.info(f"**1. {('Upload Quote' if lang == 'English' else 'Téléchargez')}" + "**\n\n" + ("Upload your renovation PDF. We extract the data instantly." if lang == 'English' else "Envoyez votre devis PDF. Nous extrayons les données instantanément."))
+    with c2:
+        st.info(f"**2. {('AI Analysis' if lang == 'English' else 'Analyse IA')}" + "**\n\n" + ("We compare prices against a database of 15,000+ Paris projects." if lang == 'English' else "Nous comparons les prix avec une base de 15 000+ chantiers parisiens."))
+    with c3:
+        st.info(f"**3. {('Get Verdict' if lang == 'English' else 'Recevez le Verdict')}" + "**\n\n" + ("Know instantly if you are overpaying and by how much." if lang == 'English' else "Sachez instantanément si vous payez trop cher et de combien."))
+
+    # 2. COMPARISON
+    st.markdown("---")
+    st.markdown(f"### ⚖️ {('Why choose QuoteGuard?' if lang == 'English' else 'Pourquoi choisir QuoteGuard ?')}")
+    
+    comp_col1, comp_col2 = st.columns(2)
+    with comp_col1:
+        st.markdown(f"""
+        <div style="padding:20px; background:#F1F5F9; border-radius:10px;">
+            <h4 style="color:#64748B; text-align:center;">❌ {('Traditional Way' if lang == 'English' else 'Méthode Classique')}</h4>
+            <ul style="font-size:14px; line-height:2;">
+                <li>📉 {('No price benchmarks' if lang == 'English' else 'Aucune référence de prix')}</li>
+                <li>😰 {('Fear of being scammed' if lang == 'English' else 'Peur de l\'arnaque')}</li>
+                <li>⏳ {('Days of waiting' if lang == 'English' else 'Jours d\'attente')}</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with comp_col2:
+        st.markdown(f"""
+        <div style="padding:20px; background:#F0FDF4; border:1px solid #22C55E; border-radius:10px;">
+            <h4 style="color:#166534; text-align:center;">✅ QuoteGuard</h4>
+            <ul style="font-size:14px; line-height:2; color:#14532D;">
+                <li>📊 {('Real market data' if lang == 'English' else 'Données réelles du marché')}</li>
+                <li>🛡️ {('SIRET & Legal verification' if lang == 'English' else 'Vérification SIRET & Légale')}</li>
+                <li>⚡ {('Instant Audit' if lang == 'English' else 'Audit Instantané')}</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 3. FAQ
+    st.markdown("---")
+    st.markdown(f"### 💬 FAQ")
+    with st.expander(f"❓ {('Is my data safe?' if lang == 'English' else 'Mes données sont-elles sécurisées ?')}"):
+        st.write("Yes. We do not store your documents permanently. They are processed in RAM and discarded after analysis." if lang == 'English' else "Oui. Nous ne stockons pas vos documents. Ils sont traités en mémoire vive et supprimés après analyse.")
+    
+    with st.expander(f"❓ {('How accurate is the price estimation?' if lang == 'English' else 'Quelle est la précision de l\'estimation ?')}"):
+        st.write("Our estimates are based on average market rates in Paris (2024). They serve as a strong negotiation baseline." if lang == 'English' else "Nos estimations sont basées sur les taux moyens du marché parisien (2024). Elles servent de base solide pour la négociation.")
 
 # ---------- FOOTER ----------
 st.caption(t["disclaimer"])
