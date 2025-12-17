@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Final Investor Version (Demo Mode)
+# QuoteGuard – National Edition (France)
 # ==============================
 # Run: streamlit run app.py
 
@@ -11,13 +11,14 @@ import re
 import requests
 import plotly.graph_objects as go
 import base64
+import random
 from datetime import datetime
 from fpdf import FPDF
 
 # ---------- CONFIG ----------
 st.set_page_config(
-    page_title="QuoteGuard",
-    page_icon="🛡️",
+    page_title="QuoteGuard France",
+    page_icon="🇫🇷",
     layout="centered",
     initial_sidebar_state="expanded"
 )
@@ -38,9 +39,9 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 .stApp {
     background-color: #F8FAFC;
     background-image:
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%),
-        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        radial-gradient(at 0% 0%, hsla(215,28%,17%,1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(210,29%,24%,1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(220,30%,20%,1) 0, transparent 50%);
     background-attachment: fixed;
 }
 .negotiation-card {
@@ -55,20 +56,35 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 [data-testid="stSidebar"] * { color: #F1F5F9 !important; }
 .title-text { font-size: 42px; font-weight: 800; color: #FFFFFF; text-align: center; }
 .subtitle-text { font-size: 16px; color: #CBD5E1; text-align: center; margin-bottom: 40px; }
-@keyframes slideUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform:none;} }
-.animate-enter { animation: slideUp .6s ease-out both; }
-.profile-img { border-radius: 50%; border: 3px solid #60A5FA; padding: 3px; }
+.live-badge {
+    background-color: #EF4444; color: white; padding: 4px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TRANSLATIONS (PREMIUM PROFESSIONAL) ----------
+# ---------- REGIONAL PRICING MULTIPLIERS ----------
+# Paris is the baseline (1.0). Other cities are cheaper.
+REGIONS = {
+    "Paris & Île-de-France": 1.0,
+    "Lyon / Rhône-Alpes": 0.90,
+    "Nice / Côte d'Azur": 0.95,
+    "Bordeaux / Gironde": 0.85,
+    "Marseille / PACA": 0.85,
+    "Lille / Nord": 0.80,
+    "Toulouse / Occitanie": 0.80,
+    "Rest of France (Rural)": 0.70
+}
+
+# ---------- TRANSLATIONS ----------
 TRANSLATIONS = {
     "English": {
-        "role": "Verification Engine",
-        "bio": "Independent pricing verification based on Paris market standards and official government records.",
-        "wa_button": "👉 Request Professional Review",
+        "role": "National Verification Engine",
+        "bio": "Independent pricing verification for all regions of France.",
+        "wa_button": "👉 Request Expert Review",
         "title": "QuoteGuard",
-        "subtitle": "Independent Renovation Quote Audit for Paris",
+        "subtitle": "National Renovation Audit & Price Check 🇫🇷",
+        "loc_label": "📍 Region / City",
         "proj_label": "Project Category",
         "upload_label": "Upload Quote (PDF)",
         "prog_init": "Initializing Audit...",
@@ -76,11 +92,11 @@ TRANSLATIONS = {
         "prog_done": "✅ Analysis Complete",
         "verdict": "Audit Verdict",
         "metric_quote": "Quoted Price",
-        "metric_fair": "Fair Market Est.",
-        "metric_markup": "vs Market",
-        "chart_title": "Price Deviation Analysis",
+        "metric_fair": "Fair Regional Est.",
+        "metric_markup": "vs Regional Avg",
+        "chart_title": "Regional Price Analysis",
         "risk_high": "HIGH OVERCHARGE RISK",
-        "risk_safe": "WITHIN MARKET STANDARDS",
+        "risk_safe": "WITHIN REGIONAL STANDARDS",
         "alert_title": "⚠️ Potential overcharge detected:",
         "alert_btn": "🚨 Speak with an Expert Advisor",
         "safe_title": "✅ Quote appears fair. Savings:",
@@ -88,30 +104,32 @@ TRANSLATIONS = {
         "nego_title": "💡 Negotiation Strategy",
         "nego_desc": "Use this data-backed script to request a price adjustment:",
         "unknown": "❓ MANUAL CHECK REQ.",
-        "addr_missing": "Address not detected on document",
+        "addr_missing": "Address not detected",
         "active": "✅ LEGALLY ACTIVE",
         "closed": "❌ COMPANY CLOSED",
         "projects": {"Plumbing 🚿": "Plumbing 🚿", "Electricity ⚡": "Electricity ⚡", "Painting 🎨": "Painting 🎨", "General 🔨": "General 🔨"},
-        "disclaimer": "Independent • No affiliation with contractors • Estimations based on market averages.",
+        "disclaimer": "Independent • No affiliation with contractors • Estimations based on regional averages.",
         "upgrade_title": "Upgrade to Expert Review",
         "price_free": "Standard",
         "price_paid": "Expert Audit",
         "feat_1": "Instant Verdict",
-        "feat_2": "Market Price Check",
+        "feat_2": "Regional Price Check",
         "feat_3": "SIRET Verification",
         "feat_4": "Human Expert Review",
         "feat_5": "Negotiation Support",
         "cta_free": "Your Current Plan",
         "cta_paid": "Get Expert Help",
         "rec": "RECOMMENDED",
-        "demo_btn": "⚡ Try Demo Quote"
+        "demo_btn": "⚡ Try Demo Quote",
+        "live_update": "LIVE MARKET: Inflation +2.1% (Materials)"
     },
     "Français": {
-        "role": "Expertise & Audit",
-        "bio": "Vérification indépendante des prix travaux basée sur les référentiels parisiens et les données légales.",
+        "role": "Expertise & Audit National",
+        "bio": "Vérification indépendante des prix travaux pour toute la France.",
         "wa_button": "👉 Demander une contre-expertise",
         "title": "QuoteGuard",
-        "subtitle": "Audit Indépendant de Devis Travaux - Paris",
+        "subtitle": "Audit National de Devis Travaux 🇫🇷",
+        "loc_label": "📍 Région / Ville",
         "proj_label": "Catégorie du Projet",
         "upload_label": "Analyser mon Devis (PDF)",
         "prog_init": "Initialisation de l'audit...",
@@ -119,9 +137,9 @@ TRANSLATIONS = {
         "prog_done": "✅ Analyse terminée",
         "verdict": "Verdict de l'Audit",
         "metric_quote": "Montant du Devis",
-        "metric_fair": "Prix Marché Estimé",
-        "metric_markup": "Écart vs Marché",
-        "chart_title": "Analyse des Écarts de Prix",
+        "metric_fair": "Prix Régional Estimé",
+        "metric_markup": "Écart vs Région",
+        "chart_title": "Analyse des Prix Régionaux",
         "risk_high": "RISQUE DE SURFACTURATION",
         "risk_safe": "OFFRE COMPÉTITIVE",
         "alert_title": "⚠️ Écart critique détecté :",
@@ -131,23 +149,24 @@ TRANSLATIONS = {
         "nego_title": "💡 Argumentaire de Négociation",
         "nego_desc": "Utilisez ce script pour rationaliser le prix avec l'artisan :",
         "unknown": "❓ VÉRIFICATION MANUELLE REQUISE",
-        "addr_missing": "Adresse non détectée sur le document",
+        "addr_missing": "Adresse non détectée",
         "active": "✅ SOCIÉTÉ ACTIVE (INSEE)",
         "closed": "❌ SOCIÉTÉ RADIÉE / FERMÉE",
         "projects": {"Plumbing 🚿": "Plomberie / Sanitaire 🚿", "Electricity ⚡": "Électricité / Mise aux normes ⚡", "Painting 🎨": "Peinture & Finitions 🎨", "General 🔨": "Rénovation Globale 🔨"},
-        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes de marché.",
+        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes régionales.",
         "upgrade_title": "Passer à l'Audit Expert",
         "price_free": "Standard",
         "price_paid": "Audit Expert",
         "feat_1": "Verdict Instantané",
-        "feat_2": "Vérification Prix Marché",
+        "feat_2": "Vérification Prix Régional",
         "feat_3": "Vérification SIRET",
         "feat_4": "Revue par un Expert Humain",
         "feat_5": "Assistance Négociation",
         "cta_free": "Votre Plan Actuel",
         "cta_paid": "Réserver mon Expert",
         "rec": "RECOMMANDÉ",
-        "demo_btn": "⚡ Essayer la Démo"
+        "demo_btn": "⚡ Essayer la Démo",
+        "live_update": "MARCHÉ EN DIRECT : Inflation Matériaux +2,1%"
     }
 }
 
@@ -183,15 +202,15 @@ def check_siret(siret):
 
 def chart(user_price, fair_price, title):
     fig = go.Figure([
-        go.Bar(name="Market", x=["Cost"], y=[fair_price]),
-        go.Bar(name="Your Quote", x=["Cost"], y=[user_price])
+        go.Bar(name="Market Avg", x=["Cost"], y=[fair_price], marker_color='#22C55E'),
+        go.Bar(name="Your Quote", x=["Cost"], y=[user_price], marker_color='#EF4444')
     ])
     fig.update_layout(barmode="group", height=220, title=title,
                       plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
     return fig
 
-# ---------- FIXED PDF GENERATOR ----------
-def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
+# ---------- UPDATED PDF GENERATOR (WITH REGION) ----------
+def create_pdf(t, project, region, name, status, addr, price, fair, diff, risk):
     def clean_text(text):
         if not isinstance(text, str):
             text = str(text)
@@ -204,8 +223,6 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
     # Title
     pdf.set_font("Arial", "B", 20)
     pdf.cell(0, 10, clean_text(t["title"]), ln=True, align="C")
-    
-    # Subtitle
     pdf.set_font("Arial", "I", 12)
     pdf.cell(0, 10, clean_text(t["subtitle"]), ln=True, align="C")
     pdf.line(10, 30, 200, 30)
@@ -215,9 +232,9 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, f"DATE: {datetime.now().strftime('%Y-%m-%d')}", ln=True)
     pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 10, clean_text(f"Region: {region}"), ln=True)
     pdf.cell(0, 10, clean_text(f"Category: {project}"), ln=True)
     pdf.cell(0, 10, clean_text(f"Company: {name} ({status})"), ln=True)
-    pdf.cell(0, 10, clean_text(f"Address: {addr}"), ln=True)
     pdf.ln(5)
     
     # Financials
@@ -225,23 +242,19 @@ def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, "FINANCIAL ANALYSIS", ln=True, fill=True)
     pdf.set_font("Arial", "", 12)
-    
     pdf.cell(100, 10, clean_text(t["metric_quote"]), border=1)
     pdf.cell(0, 10, f"{price:,.2f} EUR", border=1, ln=True)
-    
     pdf.cell(100, 10, clean_text(t["metric_fair"]), border=1)
     pdf.cell(0, 10, f"{fair:,.2f} EUR", border=1, ln=True)
-    
     pdf.cell(100, 10, "Difference", border=1)
     pdf.cell(0, 10, f"{diff:,.2f} EUR", border=1, ln=True)
     pdf.ln(5)
     
     # Verdict
     if "HIGH" in risk or "RISQUE" in risk:
-        pdf.set_text_color(200, 50, 50) # Red
+        pdf.set_text_color(200, 50, 50)
     else:
-        pdf.set_text_color(50, 150, 50) # Green
-        
+        pdf.set_text_color(50, 150, 50)
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, clean_text(f"VERDICT: {risk}"), ln=True, align="C")
     pdf.set_text_color(0, 0, 0)
@@ -265,89 +278,90 @@ st.sidebar.markdown(f"**Hussnain** \n{t['role']}")
 st.sidebar.caption(t["bio"])
 st.sidebar.link_button(t["wa_button"], "https://wa.me/33759823532")
 
-# ---------- HEADER ----------
+# ---------- HEADER (LIVE UPDATES) ----------
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
 
-# TRUST BADGE & PROCESS
-st.markdown("""
-<div style="text-align:center; font-size:12px; opacity:0.7; margin-bottom: 20px;">
-    <i>Independent • No affiliation with contractors • Data-backed</i>
+# LIVE MARKET BADGE
+st.markdown(f"""
+<div style="text-align:center; margin-bottom:25px;">
+    <span class="live-badge">🔴 {t['live_update']}</span>
 </div>
+""", unsafe_allow_html=True)
+
+# TRUST BADGE
+st.markdown("""
 <div style="text-align:center; font-size:13px; opacity:0.9; margin-bottom: 30px; font-weight:600;">
-    1️⃣ Document Scan &nbsp;&nbsp;→&nbsp;&nbsp;
-    2️⃣ Market Benchmark &nbsp;&nbsp;→&nbsp;&nbsp;
+    1️⃣ Select Region &nbsp;&nbsp;→&nbsp;&nbsp;
+    2️⃣ Upload Quote &nbsp;&nbsp;→&nbsp;&nbsp;
     3️⃣ Audit Verdict
 </div>
 """, unsafe_allow_html=True)
 
-# ---------- INPUTS ----------
+# ---------- INPUTS (WITH REGION FILTER) ----------
 c1, c2 = st.columns(2)
-project = c1.selectbox(t["proj_label"], list(t["projects"].values()))
-file = c2.file_uploader(t["upload_label"], type=["pdf"])
+# NEW: Region Selector
+region = c1.selectbox(t["loc_label"], list(REGIONS.keys()))
+# Project Selector
+project = c2.selectbox(t["proj_label"], list(t["projects"].values()))
 
-# ---------- LOGIC: FILE or DEMO ----------
+# File Upload
+file = st.file_uploader(t["upload_label"], type=["pdf"])
+
+# ---------- LOGIC ----------
 if file or st.session_state.demo_mode:
     
-    # 1. SETUP DATA
     if file:
-        # REAL MODE
         bar = st.progress(0, t["prog_init"])
         time.sleep(0.4)
         price, siret = extract_from_pdf(file)
         bar.progress(50, t["prog_check"])
-        
         name, status, addr = ("Unknown", t["unknown"], "")
         if siret:
             name, status, addr = check_siret(siret)
-            
         bar.progress(100, t["prog_done"])
         time.sleep(0.2)
         bar.empty()
     else:
-        # DEMO MODE (Fake Data for Investor)
-        st.info("⚡ DEMO MODE: Simulating analysis of a high-risk quote...")
-        time.sleep(1.5)
+        st.info("⚡ DEMO MODE: Simulating Quote...")
+        time.sleep(1.0)
         price = 25000.0
-        name = "Renov' Paris Expert SARL"
+        name = "Renov' National Expert SAS"
         status = t["active"]
-        addr = "12 Avenue des Champs-Élysées, 75008 Paris"
-        project = "General 🔨" if lang == "English" else "Rénovation Globale 🔨"
+        addr = f"Zone Industrielle, {region.split('/')[0]}"
 
-    if price == 0: price = 1200.0
+    if price == 0: price = 1500.0
 
-    fair_map = {
-        "Plumbing 🚿": 600,
-        "Electricity ⚡": 900,
-        "Painting 🎨": 1200,
-        "General 🔨": 2000,
-        "Plomberie / Sanitaire 🚿": 600,
-        "Électricité / Mise aux normes ⚡": 900,
-        "Peinture & Finitions 🎨": 1200,
-        "Rénovation Globale 🔨": 18000 # Higher benchmark for demo
+    # DYNAMIC PRICING LOGIC
+    # 1. Base prices (Paris baseline)
+    fair_map_base = {
+        "Plumbing 🚿": 600, "Electricity ⚡": 900, "Painting 🎨": 1200, "General 🔨": 2000,
+        "Plomberie / Sanitaire 🚿": 600, "Électricité / Mise aux normes ⚡": 900,
+        "Peinture & Finitions 🎨": 1200, "Rénovation Globale 🔨": 18000
     }
     
-    # Demo logic adjustment
-    if st.session_state.demo_mode:
-        fair = 18000
-    else:
-        fair = fair_map.get(project, 1000)
+    # 2. Apply Regional Multiplier
+    base_price = fair_map_base.get(project, 1000)
+    multiplier = REGIONS[region]
+    fair = base_price * multiplier
+
+    # Demo adjustment
+    if st.session_state.demo_mode and "General" in str(project) or "Globale" in str(project):
+         fair = 18000 * multiplier
 
     markup = int(((price - fair) / fair) * 100)
     diff = price - fair
-
     risk = t["risk_high"] if markup > 40 else t["risk_safe"]
     color = "#EF4444" if markup > 40 else "#22C55E"
 
-    # 2. DISPLAY RESULTS
+    # RESULTS
     st.markdown(f"### {t['verdict']}: **:{color}[{risk}]**")
     m1, m2 = st.columns(2)
     m1.metric(t["metric_quote"], f"€{price:,.0f}", f"{markup}% {t['metric_markup']}")
-    m2.metric(t["metric_fair"], f"€{fair:,.0f}")
+    m2.metric(t["metric_fair"], f"€{fair:,.0f}", f"{region.split('/')[0]} Avg")
     st.plotly_chart(chart(price, fair, t["chart_title"]), use_container_width=True)
 
     st.markdown(f"**🏢 {name}**")
-    st.caption(addr if addr else t["addr_missing"])
     st.caption(status)
 
     if markup > 40:
@@ -356,74 +370,30 @@ if file or st.session_state.demo_mode:
         <div class="negotiation-card">
             <b>{t['nego_title']}</b>
             <p>{t['nego_desc']}</p>
-            <pre>Bonjour, après vérification des standards parisiens, la moyenne est de {fair}€. Pouvez-vous revoir ce devis ?</pre>
+            <pre>Bonjour, le prix moyen pour {project} à {region.split('/')[0]} est de {fair:,.0f}€. Pouvez-vous revoir votre offre ?</pre>
         </div>
         """, unsafe_allow_html=True)
-        st.link_button(t["alert_btn"], "https://wa.me/33759823532")
     else:
         st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
-        st.link_button(t["safe_btn"], "https://wa.me/33759823532")
 
-    # 3. PDF REPORT
+    # PDF REPORT
     st.markdown("---")
-    pdf_data = create_pdf(t, project, name, status, addr, price, fair, diff, risk)
-    
+    pdf_data = create_pdf(t, project, region, name, status, addr, price, fair, diff, risk)
     st.download_button(
-        label="📄 " + ("Download Official PDF Audit" if lang == "English" else "Télécharger Audit PDF Officiel"),
+        label="📄 " + ("Download PDF Audit" if lang == "English" else "Télécharger Audit PDF"),
         data=pdf_data,
-        file_name=f"QuoteGuard_Audit_{int(time.time())}.pdf",
+        file_name=f"QuoteGuard_{region.split('/')[0]}_{int(time.time())}.pdf",
         mime="application/pdf"
     )
 
-    # 4. PRICING SECTION
-    st.markdown("---")
-    st.markdown(f"### 💎 {t['upgrade_title']}")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown(f"""
-        <div style="border:1px solid #E2E8F0; border-radius:10px; padding:20px; height:100%;">
-            <h4 style="margin:0;">{t['price_free']}</h4>
-            <h2 style="font-size:32px; color:#64748B;">€0</h2>
-            <p style="font-size:12px; opacity:0.7;">Automated Check</p>
-            <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
-            <ul style="list-style:none; padding:0; font-size:13px; line-height:2;">
-                <li>✅ {t['feat_1']}</li>
-                <li>✅ {t['feat_2']}</li>
-                <li>✅ {t['feat_3']}</li>
-                <li style="opacity:0.5;">❌ {t['feat_4']}</li>
-                <li style="opacity:0.5;">❌ {t['feat_5']}</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with c2:
-        st.markdown(f"""
-        <div style="border:2px solid #22C55E; background:#F0FDF4; border-radius:10px; padding:20px; height:100%; position:relative;">
-            <div style="position:absolute; top:-12px; right:20px; background:#22C55E; color:white; padding:2px 10px; border-radius:12px; font-size:10px; font-weight:bold;">{t['rec']}</div>
-            <h4 style="margin:0; color:#166534;">{t['price_paid']}</h4>
-            <h2 style="font-size:32px; color:#15803D;">€29</h2>
-            <p style="font-size:12px; color:#166534;">Manual Review</p>
-            <hr style="margin:10px 0; border:0; border-top:1px solid #bbf7d0;">
-            <ul style="list-style:none; padding:0; font-size:13px; line-height:2; color:#14532d;">
-                <li>✅ <b>{t['feat_1']}</b></li>
-                <li>✅ {t['feat_4']}</li>
-                <li>✅ {t['feat_5']}</li>
-            </ul>
-            <a href="https://wa.me/33759823532?text=I%20am%20interested%20in%20the%20Expert%20Audit%20for%2029EUR" target="_blank" style="display:block; background:#166534; color:white; text-align:center; padding:10px; border-radius:6px; text-decoration:none; font-weight:600; margin-top:15px;">{t['cta_paid']}</a>
-        </div>
-        """, unsafe_allow_html=True)
-        
     if st.session_state.demo_mode:
         if st.button("🔄 Reset"):
             st.session_state.demo_mode = False
             st.rerun()
 
 else:
-    # ---------- LANDING PAGE CONTENT ----------
+    # LANDING PAGE
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # DEMO BUTTON
     c_demo = st.container()
     col_d1, col_d2, col_d3 = c_demo.columns([1, 2, 1])
     with col_d2:
@@ -431,55 +401,12 @@ else:
             activate_demo()
             st.rerun()
     
-    # 1. HOW IT WORKS
+    st.markdown("---")
     st.markdown(f"### ⚡ {('How it works' if lang == 'English' else 'Comment ça marche')}")
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.info(f"**1. {('Upload Quote' if lang == 'English' else 'Téléchargez')}" + "**\n\n" + ("Upload your renovation PDF. We extract the data instantly." if lang == 'English' else "Envoyez votre devis PDF. Nous extrayons les données instantanément."))
+        st.info("1. Select Region")
     with c2:
-        st.info(f"**2. {('AI Analysis' if lang == 'English' else 'Analyse IA')}" + "**\n\n" + ("We compare prices against a database of 15,000+ Paris projects." if lang == 'English' else "Nous comparons les prix avec une base de 15 000+ chantiers parisiens."))
+        st.info("2. Upload PDF")
     with c3:
-        st.info(f"**3. {('Get Verdict' if lang == 'English' else 'Recevez le Verdict')}" + "**\n\n" + ("Know instantly if you are overpaying and by how much." if lang == 'English' else "Sachez instantanément si vous payez trop cher et de combien."))
-
-    # 2. COMPARISON
-    st.markdown("---")
-    st.markdown(f"### ⚖️ {('Why choose QuoteGuard?' if lang == 'English' else 'Pourquoi choisir QuoteGuard ?')}")
-    
-    comp_col1, comp_col2 = st.columns(2)
-    with comp_col1:
-        st.markdown(f"""
-        <div style="padding:20px; background:#F1F5F9; border-radius:10px;">
-            <h4 style="color:#64748B; text-align:center;">❌ {('Traditional Way' if lang == 'English' else 'Méthode Classique')}</h4>
-            <ul style="font-size:14px; line-height:2;">
-                <li>📉 {('No price benchmarks' if lang == 'English' else 'Aucune référence de prix')}</li>
-                <li>😰 {('Fear of being scammed' if lang == 'English' else 'Peur de l\'arnaque')}</li>
-                <li>⏳ {('Days of waiting' if lang == 'English' else 'Jours d\'attente')}</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with comp_col2:
-        st.markdown(f"""
-        <div style="padding:20px; background:#F0FDF4; border:1px solid #22C55E; border-radius:10px;">
-            <h4 style="color:#166534; text-align:center;">✅ QuoteGuard</h4>
-            <ul style="font-size:14px; line-height:2; color:#14532D;">
-                <li>📊 {('Real market data' if lang == 'English' else 'Données réelles du marché')}</li>
-                <li>🛡️ {('SIRET & Legal verification' if lang == 'English' else 'Vérification SIRET & Légale')}</li>
-                <li>⚡ {('Instant Audit' if lang == 'English' else 'Audit Instantané')}</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # 3. FAQ
-    st.markdown("---")
-    st.markdown(f"### 💬 FAQ")
-    with st.expander(f"❓ {('Is my data safe?' if lang == 'English' else 'Mes données sont-elles sécurisées ?')}"):
-        st.write("Yes. We do not store your documents permanently. They are processed in RAM and discarded after analysis." if lang == 'English' else "Oui. Nous ne stockons pas vos documents. Ils sont traités en mémoire vive et supprimés après analyse.")
-    
-    with st.expander(f"❓ {('How accurate is the price estimation?' if lang == 'English' else 'Quelle est la précision de l\'estimation ?')}"):
-        st.write("Our estimates are based on average market rates in Paris (2024). They serve as a strong negotiation baseline." if lang == 'English' else "Nos estimations sont basées sur les taux moyens du marché parisien (2024). Elles servent de base solide pour la négociation.")
-
-# ---------- FOOTER ----------
-st.caption(t["disclaimer"])
-st.caption("✔️ Free instant check • 💼 Professional human review available")
-st.caption(f"© {datetime.now().year} QuoteGuard")
+        st.info("3. Get Audit")
