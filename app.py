@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Premium Edition
+# QuoteGuard – Premium Edition (Final)
 # ==============================
 # Run: streamlit run app.py
 
@@ -53,7 +53,7 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TRANSLATIONS (PREMIUM VERSION) ----------
+# ---------- TRANSLATIONS (PREMIUM PROFESSIONAL) ----------
 TRANSLATIONS = {
     "English": {
         "role": "Verification Engine",
@@ -87,35 +87,35 @@ TRANSLATIONS = {
         "disclaimer": "Independent • No affiliation with contractors • Estimations based on market averages."
     },
     "Français": {
-        "role": "Moteur de Vérification",
-        "bio": "Vérification indépendante des prix basée sur les standards parisiens et les registres officiels.",
-        "wa_button": "👉 Demander un Avis d'Expert",
+        "role": "Expertise & Audit",
+        "bio": "Vérification indépendante des prix travaux basée sur les référentiels parisiens et les données légales.",
+        "wa_button": "👉 Demander une contre-expertise",
         "title": "QuoteGuard",
         "subtitle": "Audit Indépendant de Devis Travaux - Paris",
         "proj_label": "Catégorie du Projet",
-        "upload_label": "Télécharger Devis (PDF)",
+        "upload_label": "Analyser mon Devis (PDF)",
         "prog_init": "Initialisation de l'audit...",
-        "prog_check": "🔎 Vérification Légale...",
-        "prog_done": "✅ Analyse Terminée",
+        "prog_check": "🔎 Vérification de l'existence légale (SIRET)...",
+        "prog_done": "✅ Analyse terminée",
         "verdict": "Verdict de l'Audit",
-        "metric_quote": "Prix du Devis",
-        "metric_fair": "Estimation Juste",
-        "metric_markup": "vs Marché",
+        "metric_quote": "Montant du Devis",
+        "metric_fair": "Prix Marché Estimé",
+        "metric_markup": "Écart vs Marché",
         "chart_title": "Analyse des Écarts de Prix",
         "risk_high": "RISQUE DE SURFACTURATION",
-        "risk_safe": "CONFORME AU MARCHÉ",
-        "alert_title": "⚠️ Écart potentiel détecté :",
+        "risk_safe": "OFFRE COMPÉTITIVE",
+        "alert_title": "⚠️ Écart critique détecté :",
         "alert_btn": "🚨 Parler à un Expert",
-        "safe_title": "✅ Devis conforme. Économie :",
-        "safe_btn": "💬 Confirmer avec un Expert",
-        "nego_title": "💡 Stratégie de Négociation",
-        "nego_desc": "Utilisez cet argumentaire pour ajuster le prix :",
-        "unknown": "❓ VÉRIFICATION MANUELLE",
-        "addr_missing": "Adresse non détectée",
-        "active": "✅ LÉGALEMENT ACTIF",
-        "closed": "❌ SOCIÉTÉ FERMÉE",
-        "projects": {"Plumbing 🚿": "Plomberie 🚿", "Electricity ⚡": "Electricité ⚡", "Painting 🎨": "Peinture 🎨", "General 🔨": "Rénovation 🔨"},
-        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes."
+        "safe_title": "✅ Devis conforme au marché. Gain potentiel :",
+        "safe_btn": "💬 Valider ce devis",
+        "nego_title": "💡 Argumentaire de Négociation",
+        "nego_desc": "Utilisez ce script pour rationaliser le prix avec l'artisan :",
+        "unknown": "❓ VÉRIFICATION MANUELLE REQUISE",
+        "addr_missing": "Adresse non détectée sur le document",
+        "active": "✅ SOCIÉTÉ ACTIVE (INSEE)",
+        "closed": "❌ SOCIÉTÉ RADIÉE / FERMÉE",
+        "projects": {"Plumbing 🚿": "Plomberie / Sanitaire 🚿", "Electricity ⚡": "Électricité / Mise aux normes ⚡", "Painting 🎨": "Peinture & Finitions 🎨", "General 🔨": "Rénovation Globale 🔨"},
+        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes de marché."
     }
 }
 
@@ -215,10 +215,10 @@ if file:
         "Electricity ⚡": 900,
         "Painting 🎨": 1200,
         "General Renovation 🔨": 2000,
-        "Plomberie 🚿": 600,
-        "Électricité ⚡": 900,
-        "Peinture 🎨": 1200,
-        "Rénovation générale 🔨": 2000
+        "Plomberie / Sanitaire 🚿": 600,
+        "Électricité / Mise aux normes ⚡": 900,
+        "Peinture & Finitions 🎨": 1200,
+        "Rénovation Globale 🔨": 2000
     }
     fair = fair_map.get(project, 1000)
     markup = int(((price - fair) / fair) * 100)
@@ -251,7 +251,7 @@ if file:
         st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
         st.link_button(t["safe_btn"], "https://wa.me/33759823532")
 
-    # ---------- REPORT GENERATION (NEW) ----------
+    # ---------- REPORT GENERATION ----------
     st.markdown("---")
     
     report_text = f"""
