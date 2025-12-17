@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard AI – Complete App
+# QuoteGuard – Premium Edition
 # ==============================
 # Run: streamlit run app.py
 
@@ -15,7 +15,7 @@ from datetime import datetime
 
 # ---------- CONFIG ----------
 st.set_page_config(
-    page_title="QuoteGuard AI",
+    page_title="QuoteGuard",
     page_icon="🛡️",
     layout="centered",
     initial_sidebar_state="expanded"
@@ -53,79 +53,69 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TRANSLATIONS ----------
+# ---------- TRANSLATIONS (PREMIUM VERSION) ----------
 TRANSLATIONS = {
     "English": {
-        "role": "Lead Data Scientist",
-        "bio": "I built this tool to help people avoid renovation scams in Paris.",
-        "wa_button": "👉 WhatsApp Me",
-        "title": "QuoteGuard AI",
-        "subtitle": "Paris Renovation Quote Verification",
+        "role": "Verification Engine",
+        "bio": "Independent pricing verification based on Paris market standards and official government records.",
+        "wa_button": "👉 Request Professional Review",
+        "title": "QuoteGuard",
+        "subtitle": "Independent Renovation Quote Audit for Paris",
         "proj_label": "Project Category",
         "upload_label": "Upload Quote (PDF)",
-        "prog_init": "Initializing analysis…",
-        "prog_check": "🔎 Checking company status…",
-        "prog_done": "✅ Analysis complete",
-        "verdict": "Verdict",
+        "prog_init": "Initializing Audit...",
+        "prog_check": "🔎 Verifying Company Authority...",
+        "prog_done": "✅ Analysis Complete",
+        "verdict": "Audit Verdict",
         "metric_quote": "Quoted Price",
-        "metric_fair": "Fair Estimate",
+        "metric_fair": "Fair Market Est.",
         "metric_markup": "vs Market",
-        "chart_title": "Price Comparison",
-        "risk_high": "HIGH RISK",
-        "risk_safe": "SAFE",
-        "alert_title": "⚠️ Possible overpayment of",
-        "alert_btn": "🚨 Get Expert Help",
-        "safe_title": "✅ Looks good! Estimated saving",
+        "chart_title": "Price Deviation Analysis",
+        "risk_high": "HIGH OVERCHARGE RISK",
+        "risk_safe": "WITHIN MARKET STANDARDS",
+        "alert_title": "⚠️ Potential overcharge detected:",
+        "alert_btn": "🚨 Speak with an Expert Advisor",
+        "safe_title": "✅ Quote appears fair. Savings:",
         "safe_btn": "💬 Confirm with Expert",
-        "nego_title": "💡 AI Negotiation Script",
-        "nego_desc": "Copy and send this to your artisan:",
-        "unknown": "CHECK MANUALLY",
-        "addr_missing": "Address not detected",
-        "active": "ACTIVE",
-        "closed": "CLOSED",
-        "disclaimer": "Estimates only. This tool does not replace a professional audit.",
-        "projects": {
-            "Plumbing 🚿": "Plumbing 🚿",
-            "Electricity ⚡": "Electricity ⚡",
-            "Painting 🎨": "Painting 🎨",
-            "General 🔨": "General Renovation 🔨"
-        }
+        "nego_title": "💡 Negotiation Strategy",
+        "nego_desc": "Use this data-backed script to request a price adjustment:",
+        "unknown": "❓ MANUAL CHECK REQ.",
+        "addr_missing": "Address not detected on document",
+        "active": "✅ LEGALLY ACTIVE",
+        "closed": "❌ COMPANY CLOSED",
+        "projects": {"Plumbing 🚿": "Plumbing 🚿", "Electricity ⚡": "Electricity ⚡", "Painting 🎨": "Painting 🎨", "General 🔨": "General 🔨"},
+        "disclaimer": "Independent • No affiliation with contractors • Estimations based on market averages."
     },
     "Français": {
-        "role": "Data Scientist Principal",
-        "bio": "Outil créé pour éviter les arnaques aux devis à Paris.",
-        "wa_button": "👉 Me contacter (WhatsApp)",
-        "title": "QuoteGuard AI",
-        "subtitle": "Vérification intelligente des devis",
-        "proj_label": "Type de projet",
-        "upload_label": "Télécharger le devis (PDF)",
-        "prog_init": "Initialisation de l’analyse…",
-        "prog_check": "🔎 Vérification de l’entreprise…",
-        "prog_done": "✅ Analyse terminée",
-        "verdict": "Verdict",
-        "metric_quote": "Prix du devis",
-        "metric_fair": "Estimation juste",
-        "metric_markup": "vs marché",
-        "chart_title": "Comparaison des prix",
-        "risk_high": "RISQUE ÉLEVÉ",
-        "risk_safe": "SÛR",
-        "alert_title": "⚠️ Surcoût estimé de",
-        "alert_btn": "🚨 Contacter un expert",
-        "safe_title": "✅ Bonne affaire ! Économie",
-        "safe_btn": "💬 Confirmer le devis",
-        "nego_title": "💡 Script de négociation IA",
-        "nego_desc": "Copiez et envoyez à votre artisan :",
-        "unknown": "VÉRIFIER",
+        "role": "Moteur de Vérification",
+        "bio": "Vérification indépendante des prix basée sur les standards parisiens et les registres officiels.",
+        "wa_button": "👉 Demander un Avis d'Expert",
+        "title": "QuoteGuard",
+        "subtitle": "Audit Indépendant de Devis Travaux - Paris",
+        "proj_label": "Catégorie du Projet",
+        "upload_label": "Télécharger Devis (PDF)",
+        "prog_init": "Initialisation de l'audit...",
+        "prog_check": "🔎 Vérification Légale...",
+        "prog_done": "✅ Analyse Terminée",
+        "verdict": "Verdict de l'Audit",
+        "metric_quote": "Prix du Devis",
+        "metric_fair": "Estimation Juste",
+        "metric_markup": "vs Marché",
+        "chart_title": "Analyse des Écarts de Prix",
+        "risk_high": "RISQUE DE SURFACTURATION",
+        "risk_safe": "CONFORME AU MARCHÉ",
+        "alert_title": "⚠️ Écart potentiel détecté :",
+        "alert_btn": "🚨 Parler à un Expert",
+        "safe_title": "✅ Devis conforme. Économie :",
+        "safe_btn": "💬 Confirmer avec un Expert",
+        "nego_title": "💡 Stratégie de Négociation",
+        "nego_desc": "Utilisez cet argumentaire pour ajuster le prix :",
+        "unknown": "❓ VÉRIFICATION MANUELLE",
         "addr_missing": "Adresse non détectée",
-        "active": "ACTIF",
-        "closed": "FERMÉ",
-        "disclaimer": "Estimations uniquement. Ne remplace pas un audit professionnel.",
-        "projects": {
-            "Plumbing 🚿": "Plomberie 🚿",
-            "Electricity ⚡": "Électricité ⚡",
-            "Painting 🎨": "Peinture 🎨",
-            "General 🔨": "Rénovation générale 🔨"
-        }
+        "active": "✅ LÉGALEMENT ACTIF",
+        "closed": "❌ SOCIÉTÉ FERMÉE",
+        "projects": {"Plumbing 🚿": "Plomberie 🚿", "Electricity ⚡": "Electricité ⚡", "Painting 🎨": "Peinture 🎨", "General 🔨": "Rénovation 🔨"},
+        "disclaimer": "Indépendant • Aucune affiliation avec les artisans • Estimations basées sur des moyennes."
     }
 }
 
@@ -137,7 +127,6 @@ def get_img_as_base64(path):
     except Exception:
         return None
 
-
 def extract_from_pdf(file):
     text = ""
     with pdfplumber.open(file) as pdf:
@@ -147,7 +136,6 @@ def extract_from_pdf(file):
     siret = re.search(r"\b\d{14}\b", text.replace(" ", ""))
     amount = float(price.group(2).replace(" ", "").replace(",", ".")) if price else 0.0
     return amount, (siret.group(0) if siret else None)
-
 
 def check_siret(siret):
     try:
@@ -160,7 +148,6 @@ def check_siret(siret):
     except Exception:
         pass
     return "Unknown", "CHECK", ""
-
 
 def chart(user_price, fair_price, title):
     fig = go.Figure([
@@ -179,13 +166,25 @@ img = get_img_as_base64("profile.jpeg")
 if img:
     st.sidebar.markdown(f'<div style="text-align:center"><img src="data:image/jpeg;base64,{img}" class="profile-img" width="110"></div>', unsafe_allow_html=True)
 
-st.sidebar.markdown(f"**Hussnain**  \n{t['role']}")
+st.sidebar.markdown(f"**Hussnain** \n{t['role']}")
 st.sidebar.caption(t["bio"])
 st.sidebar.link_button(t["wa_button"], "https://wa.me/33759823532")
 
-# ---------- HEADER ----------
+# ---------- HEADER (PREMIUM UPDATE) ----------
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
+
+# TRUST BADGE & PROCESS
+st.markdown("""
+<div style="text-align:center; font-size:12px; opacity:0.7; margin-bottom: 20px;">
+    <i>Independent • No affiliation with contractors • Data-backed</i>
+</div>
+<div style="text-align:center; font-size:13px; opacity:0.9; margin-bottom: 30px; font-weight:600;">
+    1️⃣ Document Scan &nbsp;&nbsp;→&nbsp;&nbsp;
+    2️⃣ Market Benchmark &nbsp;&nbsp;→&nbsp;&nbsp;
+    3️⃣ Audit Verdict
+</div>
+""", unsafe_allow_html=True)
 
 # ---------- INPUTS ----------
 c1, c2 = st.columns(2)
@@ -254,4 +253,5 @@ if file:
 
 # ---------- FOOTER ----------
 st.caption(t["disclaimer"])
-st.caption(f"© {datetime.now().year} QuoteGuard AI")
+st.caption("✔️ Free instant check • 💼 Professional human review available")
+st.caption(f"© {datetime.now().year} QuoteGuard")
