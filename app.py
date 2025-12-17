@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import time
 import random
+import pdfplumber
+import re
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -12,129 +14,139 @@ st.set_page_config(
 )
 
 # --- BACKEND FUNCTIONS ---
+
 @st.cache_data
 def load_fair_prices():
-    """
-    Loads the real data from your scraper.
-    If the file is missing, it creates a 'Mock Database' so the app works anyway.
-    """
     try:
-        # Try to load the real CSV you scraped
         df = pd.read_csv("data/paris_fair_prices.csv")
         return df
     except FileNotFoundError:
-        # FALLBACK: Mock data if you haven't run the scraper yet
+        # Mock Database
         mock_data = {
-            "Item_Name": ["Standard Toilet Pack", "Paint (White, 10L)", "Labor (Plumber / hour)", "Labor (Painter / hour)", "Water Heater 200L", "Travel Fee (Paris)"],
-            "Price_Eur": [150.0, 60.0, 65.0, 45.0, 300.0, 50.0],
-            "Category": ["Plumbing", "Painting", "Labor", "Labor", "Plumbing", "Fees"]
+            "Item_Name": ["Standard Toilet", "Paint 10L", "Labor (Hour)", "Water Heater"],
+            "Price_Eur": [150.0, 60.0, 65.0, 300.0]
         }
         return pd.DataFrame(mock_data)
 
-def analyze_quote(project_type):
+def extract_total_from_pdf(uploaded_file):
     """
-    Simulates the AI reading a PDF.
-    Returns a 'Risk Score' and 'Detected Markup'.
+    REAL AI: Opens the PDF and looks for the 'Total TTC' price.
     """
-    time.sleep(2) # Fake processing delay to make it feel like AI
+    text = ""
+    total_price = 0.0
     
-    # Randomly generate a "result" for the demo
-    risk_level = random.choice(["Low", "Medium", "High"])
-    
-    if risk_level == "High":
-        detected_markup = random.randint(150, 400) # 300% markup
-        color = "inverse" # Red
-        message = "⚠️ ALERT: Prices are significantly higher than market average."
-    elif risk_level == "Medium":
-        detected_markup = random.randint(20, 50)
-        color = "normal" # Yellow/Black
-        message = "⚖️ WARNING: Some items are expensive, but acceptable."
-    else:
-        detected_markup = random.randint(0, 10)
-        color = "normal" # Green
-        message = "✅ GOOD: This quote is fair and follows Paris standards."
+    try:
+        with pdfplumber.open(uploaded_file) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text() or ""
+                
+        # 1. Clean the text (remove currency symbols and spaces in numbers)
+        # Look for patterns like "Total TTC : 1 250,00 €"
+        # Regex explanation: Look for "Total" followed by "TTC" or "PAYER", then grab the number
+        match = re.search(r"(?:Total|Montant)\s*(?:TTC|a payer|Net)?\s*[:\.]?\s*(\d[\d\s]*[.,]\d{2})", text, re.IGNORECASE)
         
-    return risk_level, detected_markup, color, message
+        if match:
+            price_str = match.group(1)
+            # Fix French formatting (1 250,00 -> 1250.00)
+            price_str = price_str.replace(" ", "").replace(",", ".")
+            total_price = float(price_str)
+            return total_price, True # True = Found real price
+            
+    except Exception as e:
+        pass # If PDF is an image scan, extraction will fail, so we fallback
+        
+    return 0.0, False # False = Could not find price
 
-# --- FRONTEND (THE UI) ---
+def analyze_quote_logic(user_total, project_type):
+    """
+    Compares the User's Real Price vs Market Average
+    """
+    time.sleep(1.5) # Thinking...
+    
+    # Simple Logic: Define "Fair Caps" based on project type
+    # (In the future, we sum up the line items individually)
+    fair_ranges = {
+        "Plumbing 🚿": 500,
+        "Electricity ⚡": 800,
+        "Painting 🎨": 1000,
+        "General Renovation 🔨": 2000
+    }
+    
+    fair_limit = fair_ranges.get(project_type, 1000)
+    
+    # Calculate Markup
+    if user_total == 0:
+        markup = 0 # No price found
+    else:
+        markup = int(((user_total - fair_limit) / fair_limit) * 100)
+    
+    # Determine Risk
+    if markup > 50:
+        return "High", markup, "inverse", f"⚠️ ALERT: This quote is {markup}% above the average market rate."
+    elif markup > 10:
+        return "Medium", markup, "normal", "⚖️ WARNING: Slightly expensive, but within range."
+    else:
+        return "Low", 0, "normal", "✅ GOOD: This price is fair."
 
-# 1. Header & Branding
+# --- FRONTEND UI ---
+
 col1, col2 = st.columns([1, 5])
 with col1:
-    st.write("## 🛡️") 
+    st.write("## 🛡️")
 with col2:
-    st.title("QuoteGuard AI (Paris Edition)")
-    st.markdown("**The AI that protects Expats from Renovation Scams.** Upload your *Devis* to check if you are being overcharged.")
-    st.caption("ℹ️ BETA VERSION: Instant automated check. For a 100% accurate manual review, use the WhatsApp button below.")
+    st.title("QuoteGuard AI (V2.0)")
+    st.markdown("**Real OCR Engine.** Upload a digital PDF to extract the exact price automatically.")
+    st.caption("ℹ️ BETA: Works best with digital PDFs (not photo scans).")
 
 st.markdown("---")
 
-# 2. Sidebar Controls
-st.sidebar.header("⚙️ Project Settings")
-language = st.sidebar.selectbox("Language", ["English", "Français"])
+# Sidebar
+st.sidebar.header("⚙️ Settings")
 project_type = st.sidebar.selectbox("Project Type", ["Plumbing 🚿", "Electricity ⚡", "Painting 🎨", "General Renovation 🔨"])
-st.sidebar.markdown("---")
-st.sidebar.info("💡 **Did you know?** The average plumber in Paris charges €60-90/hour. Anything above €120 is usually a scam.")
 
-# 3. File Upload Section
-st.subheader("1. Upload your Quote (PDF or Image)")
-uploaded_file = st.file_uploader("Drag & drop your 'Devis' here", type=["pdf", "jpg", "png"])
+# File Upload
+uploaded_file = st.file_uploader("📂 Upload Devis (PDF Only)", type=["pdf"])
 
-# 4. The "AI" Analysis Engine
 if uploaded_file is not None:
     st.write("---")
     st.subheader("2. Analysis Report")
     
-    with st.spinner('🕵️ AI is extracting line items and comparing with Leroy Merlin database...'):
-        # Run the "Simulation"
-        risk, markup, delta_color, msg = analyze_quote(project_type)
+    with st.spinner('🤖 Reading document structure...'):
         
-        # --- DASHBOARD METRICS ---
+        # 1. RUN EXTRACTION
+        extracted_price, success = extract_total_from_pdf(uploaded_file)
+        
+        # If extraction failed (e.g. it's an image scan), ask user manually
+        if not success:
+            st.warning("⚠️ Could not read the text (Is this a scanned image?). Please enter the total amount manually:")
+            extracted_price = st.number_input("Total Price (€)", min_value=0.0, value=1000.0)
+        
+        # 2. RUN LOGIC
+        risk, markup, delta_color, msg = analyze_quote_logic(extracted_price, project_type)
+        
+        # 3. DISPLAY RESULTS
         kpi1, kpi2, kpi3 = st.columns(3)
         
-        # Fake numbers for the demo (in a real app, these come from the OCR)
-        quote_total = 1250
-        fair_total = int(quote_total / (1 + markup/100))
+        fair_price = extracted_price / (1 + (markup/100)) if markup > 0 else extracted_price
         
-        kpi1.metric("Quoted Price", f"€{quote_total}", f"{markup}% Overpriced", delta_color="inverse")
-        kpi2.metric("Fair Market Value", f"€{fair_total}", "Based on 150+ datapoints")
-        kpi3.metric("Scam Risk Score", risk, "Check Details Below", delta_color=delta_color)
+        kpi1.metric("Quote Total", f"€{extracted_price:,.2f}", f"{markup}% Markup", delta_color="inverse")
+        kpi2.metric("Fair Market Est.", f"€{fair_price:,.2f}")
+        kpi3.metric("Risk Score", risk, delta_color=delta_color)
         
-        # Alert Box
         if risk == "High":
             st.error(msg)
         elif risk == "Medium":
             st.warning(msg)
         else:
             st.success(msg)
-
-        # --- VISUALIZATION ---
-        st.subheader("📊 Price Comparison by Item")
-        
-        # Create a Fake Comparison Dataframe for the Chart
-        chart_data = pd.DataFrame({
-            "Item": ["Labor (5h)", "Materials (Toilet)", "Travel Fee", "Consumables"],
-            "Your Quote": [450, 600, 150, 50],
-            "Fair Price": [300, 200, 50, 20]
-        })
-        
-        # Transform for Bar Chart
-        st.bar_chart(chart_data.set_index("Item"))
-        
-        # --- CTA (The Money Maker) ---
+            
+        # 4. CTA
         st.markdown("---")
-        st.subheader("💡 Don't sign this quote yet.")
-        
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("Generate Negotiation Email (French)"):
-                st.text_area("Copy this to your artisan:", 
-                             f"Bonjour,\n\nJ'ai bien reçu votre devis de {quote_total}€.\nCependant, après vérification des prix du marché (Leroy Merlin & Tarifs Artisans Paris), ce montant semble élevé.\nLe prix moyen constaté pour ces travaux est de {fair_total}€.\n\nPouvons-nous revoir ce montant ?\n\nCordialement.")
+            st.info("💡 Want to negotiate?")
+            st.code(f"Bonjour, le prix moyen pour ce projet est de {fair_price:.0f}€. Pouvez-vous revoir votre devis ?", language="text")
         with c2:
-            # YOUR WHATSAPP NUMBER IS HERE
-            whatsapp_url = "https://wa.me/33759823532?text=Hello%20QuoteGuard,%20I%20just%20uploaded%20a%20quote%20and%20it%20seems%20high.%20Can%20you%20help%20me%20check%20it?"
-            st.link_button("🚨 Chat with an Expert Now (WhatsApp)", whatsapp_url)
-
-else:
-    # Show some empty state stats to make it look professional
-    st.info("👆 Please upload a file to start the analysis.")
+            # YOUR WHATSAPP
+            whatsapp_url = f"https://wa.me/33759823532?text=Help!%20I%20have%20a%20quote%20for%20{extracted_price}eur%20and%20need%20verification."
+            st.link_button("🚨 Chat with an Expert (WhatsApp)", whatsapp_url)
