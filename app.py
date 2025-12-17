@@ -170,7 +170,7 @@ st.sidebar.markdown(f"**Hussnain** \n{t['role']}")
 st.sidebar.caption(t["bio"])
 st.sidebar.link_button(t["wa_button"], "https://wa.me/33759823532")
 
-# ---------- HEADER (PREMIUM UPDATE) ----------
+# ---------- HEADER ----------
 st.markdown(f'<div class="animate-enter"><p class="title-text">🛡️ {t["title"]}</p></div>', unsafe_allow_html=True)
 st.markdown(f'<div class="animate-enter"><p class="subtitle-text">{t["subtitle"]}</p></div>', unsafe_allow_html=True)
 
@@ -250,6 +250,40 @@ if file:
     else:
         st.success(f"{t['safe_title']} €{abs(diff):,.0f}")
         st.link_button(t["safe_btn"], "https://wa.me/33759823532")
+
+    # ---------- REPORT GENERATION (NEW) ----------
+    st.markdown("---")
+    
+    report_text = f"""
+    {t['title']} - {t['subtitle']}
+    --------------------------------------------------
+    DATE: {datetime.now().strftime("%Y-%m-%d %H:%M")}
+    ID: {str(int(time.time()))}
+    
+    1. PROJECT DETAILS
+    ------------------
+    Category: {project}
+    Company Detected: {name}
+    Status: {status}
+    Address: {addr}
+    
+    2. FINANCIAL AUDIT
+    ------------------
+    Quoted Price: €{price:,.2f}
+    Fair Market Estimate: €{fair:,.2f}
+    Difference: €{diff:,.2f}
+    
+    VERDICT: {risk}
+    --------------------------------------------------
+    {t['disclaimer']}
+    """
+
+    st.download_button(
+        label="📄 " + ("Download Audit Report" if lang == "English" else "Télécharger le Rapport"),
+        data=report_text,
+        file_name=f"QuoteGuard_Audit_{int(time.time())}.txt",
+        mime="text/plain"
+    )
 
 # ---------- FOOTER ----------
 st.caption(t["disclaimer"])
