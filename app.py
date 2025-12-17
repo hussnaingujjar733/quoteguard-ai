@@ -1,5 +1,5 @@
 # ==============================
-# QuoteGuard – Premium + PDF Report
+# QuoteGuard – Final Production Version
 # ==============================
 # Run: streamlit run app.py
 
@@ -54,7 +54,7 @@ html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- TRANSLATIONS ----------
+# ---------- TRANSLATIONS (PREMIUM PROFESSIONAL) ----------
 TRANSLATIONS = {
     "English": {
         "role": "Verification Engine",
@@ -181,50 +181,73 @@ def chart(user_price, fair_price, title):
                       plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
     return fig
 
+# ---------- FIXED PDF GENERATOR ----------
 def create_pdf(t, project, name, status, addr, price, fair, diff, risk):
+    # Inner function to clean text for FPDF (latin-1 only)
+    def clean_text(text):
+        if not isinstance(text, str):
+            text = str(text)
+        # 1. Replace known problematic characters
+        text = text.replace("€", "EUR").replace("•", "-").replace("’", "'").replace("…", "...")
+        # 2. Force encoding to latin-1, replacing unknown chars (like emojis) with '?'
+        return text.encode('latin-1', 'replace').decode('latin-1')
+
     pdf = FPDF()
     pdf.add_page()
+    
+    # Title
     pdf.set_font("Arial", "B", 20)
-    pdf.cell(0, 10, t["title"], ln=True, align="C")
+    pdf.cell(0, 10, clean_text(t["title"]), ln=True, align="C")
+    
+    # Subtitle
     pdf.set_font("Arial", "I", 12)
-    pdf.cell(0, 10, t["subtitle"], ln=True, align="C")
+    pdf.cell(0, 10, clean_text(t["subtitle"]), ln=True, align="C")
     pdf.line(10, 30, 200, 30)
     pdf.ln(10)
     
-    # Details
+    # Details Section
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, f"DATE: {datetime.now().strftime('%Y-%m-%d')}", ln=True)
     pdf.set_font("Arial", "", 12)
-    pdf.cell(0, 10, f"Category: {project}", ln=True)
-    pdf.cell(0, 10, f"Company: {name} ({status})", ln=True)
-    pdf.cell(0, 10, f"Address: {addr}", ln=True)
+    pdf.cell(0, 10, clean_text(f"Category: {project}"), ln=True)
+    pdf.cell(0, 10, clean_text(f"Company: {name} ({status})"), ln=True)
+    pdf.cell(0, 10, clean_text(f"Address: {addr}"), ln=True)
     pdf.ln(5)
     
-    # Financials
+    # Financials Section
     pdf.set_fill_color(240, 240, 240)
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, "FINANCIAL ANALYSIS", ln=True, fill=True)
     pdf.set_font("Arial", "", 12)
-    pdf.cell(100, 10, t["metric_quote"], border=1)
+    
+    # Table Rows
+    pdf.cell(100, 10, clean_text(t["metric_quote"]), border=1)
     pdf.cell(0, 10, f"{price:,.2f} EUR", border=1, ln=True)
-    pdf.cell(100, 10, t["metric_fair"], border=1)
+    
+    pdf.cell(100, 10, clean_text(t["metric_fair"]), border=1)
     pdf.cell(0, 10, f"{fair:,.2f} EUR", border=1, ln=True)
+    
     pdf.cell(100, 10, "Difference", border=1)
     pdf.cell(0, 10, f"{diff:,.2f} EUR", border=1, ln=True)
     pdf.ln(5)
     
     # Verdict
-    color = (200, 50, 50) if "HIGH" in risk or "RISQUE" in risk else (50, 150, 50)
-    pdf.set_text_color(*color)
+    # Safe color logic
+    if "HIGH" in risk or "RISQUE" in risk:
+        pdf.set_text_color(200, 50, 50) # Red
+    else:
+        pdf.set_text_color(50, 150, 50) # Green
+        
     pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, f"VERDICT: {risk}", ln=True, align="C")
-    pdf.set_text_color(0, 0, 0)
+    pdf.cell(0, 10, clean_text(f"VERDICT: {risk}"), ln=True, align="C")
+    pdf.set_text_color(0, 0, 0) # Reset color
     
     # Footer
     pdf.set_y(-30)
     pdf.set_font("Arial", "I", 8)
-    pdf.multi_cell(0, 5, t["disclaimer"])
+    pdf.multi_cell(0, 5, clean_text(t["disclaimer"]))
     
+    # Return binary data safe for Streamlit
     return pdf.output(dest="S").encode("latin-1")
 
 # ---------- SIDEBAR ----------
@@ -322,6 +345,7 @@ if file:
 
     # ---------- PDF REPORT (NEW) ----------
     st.markdown("---")
+    # Call the FIXED create_pdf function
     pdf_data = create_pdf(t, project, name, status, addr, price, fair, diff, risk)
     
     st.download_button(
